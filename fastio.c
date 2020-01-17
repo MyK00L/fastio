@@ -52,6 +52,9 @@ unsigned outputi;
 #define put_char(x){\
 	output[outputi++]=x;\
 }
+void put_str(char *x){
+	while(*x)output[outputi++]=*(x++);
+}
 
 
 int main(){
@@ -63,6 +66,7 @@ int main(){
 	put_int(x);
 	put_char('x');
 	put_char('\n');
+	put_str("YES\n");
 
 	//write(1,output,outputi);
 	fwrite_unlocked(output,1,outputi,stdout);
