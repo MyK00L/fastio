@@ -45,7 +45,7 @@ unsigned outputi;
 #define put_int(x){\
 	if(x<0){\
 		output[outputi++]='-';\
-		x=-x\
+		x=-x;\
 	}\
 	put_uns(x)\
 }
