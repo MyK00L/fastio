@@ -1,0 +1,201 @@
+#pragma GCC optimize("Ofast")
+#include <unistd.h>
+#include <fcntl.h>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+template<size_t BUFSIZE=1<<16>
+class Scanner{
+	private:
+		char buf[BUFSIZE];
+		char* it;
+		char* ed;
+		const int fd;
+		Scanner(const Scanner&) = delete;
+		Scanner& operator=(const Scanner&) = delete;
+		void flush(){
+			if(it==ed){
+				ed=buf+read(fd,buf,BUFSIZE);
+				it=buf;
+			}
+		}
+		void ss(){
+			flush();
+			while(*it<=32){++it;flush();}
+		}
+		void scan(char& x){ss();x=*(it++);}
+		void scan(string& x){
+			do{
+				ss();
+				char * itbg=it;
+				while(it!=ed&&*it>32)++it;
+				x.append(itbg,it);
+			} while(it==ed);
+		}
+		template<typename T> void scan_u(T& x){
+			ss();
+			x=0;
+			do{
+				x=T(x*10+*(it++)-'0');
+				flush();
+			} while(*it>32);
+		}
+		template<typename T> void scan_i(T& x){
+			ss();
+			x=0;
+			bool sign=0;
+			if(*it=='-'){
+				sign=1;
+				++it;
+				flush();
+			}
+			do{
+				x=T(x*10+*(it++)-'0');
+				flush();
+			} while(*it>32);
+			if(sign)x=T(-x);
+		}
+		template<typename T> void scan_f(T& x){
+			ss();
+			x=0;
+			bool sign=0;
+			if(*it=='-'){
+				sign=1;
+				++it;
+				flush();
+			}
+			while(*it>32 && *it!='.'){
+				x=x*T(10.0)+T(*(it++)-'0');
+				flush();
+			}
+			if(*it=='.'){
+				++it;
+				flush();
+				T e=T(0.1);
+				while(*it>32){
+					x=x+e*T(*(it++)-'0');
+					e=e*T(0.1);
+					flush();
+				};
+			}
+			if(sign)x=-x;
+		}
+		void scan(int8_t& x){scan_i(x);}
+		void scan(int16_t& x){scan_i(x);}
+		void scan(int32_t& x){scan_i(x);}
+		void scan(int64_t& x){scan_i(x);}
+		void scan(uint8_t& x){scan_u(x);}
+		void scan(uint16_t& x){scan_u(x);}
+		void scan(uint32_t& x){scan_u(x);}
+		void scan(uint64_t& x){scan_u(x);}
+		void scan(float& x){scan_f(x);}
+		void scan(double& x){scan_f(x);}
+		void scan(long double& x){scan_f(x);}
+
+		template<typename T> void scan(T& x){for(auto &i:x)scan(i);}
+	public:
+		~Scanner(){}
+		Scanner(const int _fd=0):it(0),ed(0),fd(_fd){}
+		void operator()(){}
+		template<typename T, typename...R>
+			void operator()(T& a,R&...rest){
+				scan(a);
+				operator()(rest...);
+			}
+};
+
+template<size_t BUFSIZE=1<<16>
+class Printer {
+	private:
+		char buf[BUFSIZE];
+		char* it;
+		const int fd;
+		void fif(size_t x){
+			if(size_t(BUFSIZE+buf-it)<x)flush();
+		}
+		void print(char x){fif(1);*(it++)=x;}
+		void print(char* x){
+			size_t s = strlen(x);
+			if(s>BUFSIZE/2){
+				flush();
+				write(fd,x,s);
+			} else {
+				fif(s);
+				copy(x,x+s,it);
+				it+=s;
+			}
+		}
+		void print(const char* x){
+			print((char*)x);
+		}
+		void print(string& x){
+			if(x.size()>BUFSIZE/2){
+				flush();
+				write(fd,x.data(),x.size());
+			} else {
+				fif(x.size());
+				copy(x.begin(),x.end(),it);
+				it+=x.size();
+			}
+		}
+		template<typename T> void print_u(T x){
+			char b[sizeof(T)*4];
+			uint8_t i=sizeof(T)*4;
+			do {
+				b[--i]=char(x%10+'0');
+				x=T(x/10);
+			}while(x);
+			fif(sizeof(T)*4-i);
+			copy(b+i,b+sizeof(T)*4,it);
+			it+=sizeof(T)*4-i;
+		}
+		template<typename T> void print_i(T x){
+			if(x<0){
+				print('-');
+				x=T(-x);
+			}
+			print_u(x);
+		}
+		template<typename T> void print_f(T x){
+			size_t num = snprintf(it,0,"%.12f",x);
+			fif(num);
+			it+=snprintf(it,num,"%.12f",x);
+		}
+		void print(int8_t x){print_i(x);}
+		void print(int16_t x){print_i(x);}
+		void print(int32_t x){print_i(x);}
+		void print(int64_t x){print_i(x);}
+		void print(uint8_t x){print_u(x);}
+		void print(uint16_t x){print_u(x);}
+		void print(uint32_t x){print_u(x);}
+		void print(uint64_t x){print_u(x);}
+		void print(float x){print_f(x);}
+		void print(double x){print_f(x);}
+		void print(long double x){print_f(x);}
+
+		template<typename T> void print(T& x){
+			for(auto &i:x){
+				print(i);
+				print(' ');
+			}
+		}
+	public:
+		~Printer(){flush();}
+		Printer(const int _fd=1):it(buf),fd(_fd){}
+		void flush(){
+			write(fd,buf,it-buf);
+			it=buf;
+		}
+		void operator()(){}
+		template<typename T, typename...R>
+			void operator()(T&& a,R&&...rest){
+				print(a);
+				operator()(rest...);
+			}
+};
+
