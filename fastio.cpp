@@ -115,10 +115,10 @@ class Printer {
 		char buf[BUFSIZE];
 		char* it;
 		const int fd;
-		void fif(size_t x){
+		void fif(const size_t x){
 			if(size_t(BUFSIZE+buf-it)<x)flush();
 		}
-		void print(char x){fif(1);*(it++)=x;}
+		void print(const char x){fif(1);*(it++)=x;}
 		void print(char* x){
 			size_t s = strlen(x);
 			if(s>BUFSIZE/2){
@@ -133,7 +133,7 @@ class Printer {
 		void print(const char* x){
 			print((char*)x);
 		}
-		void print(string& x){
+		void print(const string& x){
 			if(x.size()>BUFSIZE/2){
 				flush();
 				write(fd,x.data(),x.size());
@@ -144,24 +144,24 @@ class Printer {
 			}
 		}
 		template<typename T> void print_u(T x){
-			char b[sizeof(T)*4];
-			uint8_t i=sizeof(T)*4;
+			constexpr size_t siz = size_t(sizeof(T) * log10(256)) + 1;
+			char b[siz];
+			uint8_t i=siz;
 			do {
 				b[--i]=char(x%10+'0');
 				x=T(x/10);
 			}while(x);
-			fif(sizeof(T)*4-i);
-			copy(b+i,b+sizeof(T)*4,it);
-			it+=sizeof(T)*4-i;
+			fif(siz-i);
+			copy(b+i,b+siz,it);
+			it+=siz-i;
 		}
 		template<typename T> void print_i(T x){
 			if(x<0){
 				print('-');
-				x=T(-x);
-			}
-			print_u(x);
+				print_u(-x);
+			} else print_u(x);
 		}
-		template<typename T> void print_f(T x){
+		template<typename T> void print_f(const T x){
 			size_t num = snprintf(it,0,"%.12f",x);
 			fif(num);
 			it+=snprintf(it,num,"%.12f",x);
@@ -174,11 +174,11 @@ class Printer {
 		void print(uint16_t x){print_u(x);}
 		void print(uint32_t x){print_u(x);}
 		void print(uint64_t x){print_u(x);}
-		void print(float x){print_f(x);}
-		void print(double x){print_f(x);}
-		void print(long double x){print_f(x);}
+		void print(const float x){print_f(x);}
+		void print(const double x){print_f(x);}
+		void print(const long double x){print_f(x);}
 
-		template<typename T> void print(T& x){
+		template<typename T> void print(const T& x){
 			for(auto &i:x){
 				print(i);
 				print(' ');
