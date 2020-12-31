@@ -89,10 +89,12 @@ class Scanner{
 		void scan(int16_t& x){scan_i(x);}
 		void scan(int32_t& x){scan_i(x);}
 		void scan(int64_t& x){scan_i(x);}
+		void scan(long long& x){scan_i(x);}
 		void scan(uint8_t& x){scan_u(x);}
 		void scan(uint16_t& x){scan_u(x);}
 		void scan(uint32_t& x){scan_u(x);}
 		void scan(uint64_t& x){scan_u(x);}
+		void scan(unsigned long long& x){scan_u(x);}
 		void scan(float& x){scan_f(x);}
 		void scan(double& x){scan_f(x);}
 		void scan(long double& x){scan_f(x);}
@@ -119,7 +121,7 @@ class Printer {
 			if(size_t(BUFSIZE+buf-it)<x)flush();
 		}
 		void print(const char x){fif(1);*(it++)=x;}
-		void print(char* x){
+		void print(const char* const x){
 			size_t s = strlen(x);
 			if(s>BUFSIZE/2){
 				flush();
@@ -129,9 +131,6 @@ class Printer {
 				copy(x,x+s,it);
 				it+=s;
 			}
-		}
-		void print(const char* x){
-			print((char*)x);
 		}
 		void print(const string& x){
 			if(x.size()>BUFSIZE/2){
@@ -145,8 +144,8 @@ class Printer {
 		}
 		template<typename T> void print_u(T x){
 			constexpr size_t siz = size_t(sizeof(T) * log10(256)) + 1;
-			char b[siz];
 			uint8_t i=siz;
+			char b[siz];
 			do {
 				b[--i]=char(x%10+'0');
 				x=T(x/10);
@@ -156,10 +155,19 @@ class Printer {
 			it+=siz-i;
 		}
 		template<typename T> void print_i(T x){
-			if(x<0){
-				print('-');
-				print_u(-x);
-			} else print_u(x);
+			constexpr size_t siz = size_t(sizeof(T) * log10(256)) + 2;
+			size_t i=siz;
+			char b[siz];
+			const bool neg=(x<0);
+			if(neg)x=-x;
+			do {
+				b[--i]=char(x%10+'0');
+				x=T(x/10);
+			}while(x);
+			if(neg)b[--i]='-';
+			fif(siz-i);
+			copy(b+i,b+siz,it);
+			it+=siz-i;
 		}
 		template<typename T> void print_f(const T x){
 			size_t num = snprintf(it,0,"%.12f",x);
@@ -170,10 +178,12 @@ class Printer {
 		void print(int16_t x){print_i(x);}
 		void print(int32_t x){print_i(x);}
 		void print(int64_t x){print_i(x);}
+		void print(long long x){print_i(x);}
 		void print(uint8_t x){print_u(x);}
 		void print(uint16_t x){print_u(x);}
 		void print(uint32_t x){print_u(x);}
 		void print(uint64_t x){print_u(x);}
+		void print(unsigned long long x){print_u(x);}
 		void print(const float x){print_f(x);}
 		void print(const double x){print_f(x);}
 		void print(const long double x){print_f(x);}
