@@ -121,7 +121,7 @@ class Printer {
 			if(size_t(BUFSIZE+buf-it)<x)flush();
 		}
 		void print(const char x){fif(1);*(it++)=x;}
-		void print(const char* const x){
+		void print(char* const x){
 			size_t s = strlen(x);
 			if(s>BUFSIZE/2){
 				flush();
@@ -132,6 +132,7 @@ class Printer {
 				it+=s;
 			}
 		}
+		void print(const char* const x){print((char*)x);}
 		void print(const string& x){
 			if(x.size()>BUFSIZE/2){
 				flush();
