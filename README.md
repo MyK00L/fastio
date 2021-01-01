@@ -21,5 +21,6 @@ Errors are relative
 	- float: max\_error: 0, avg\_error: 0
 	- double: max\_error: 0, avg\_error: 0
 	- long double: max\_error: 3.51204e-17, avg\_error: 6.9486e-18
+
 note that scanner cannot read floats with "e" notation
 and printer can only print floats with "e" notation
