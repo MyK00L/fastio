@@ -169,10 +169,36 @@ class Printer {
 			copy(b+i,b+siz,it);
 			it+=siz-i;
 		}
-		template<typename T> void print_f(const T x){
-			size_t num = snprintf(it,0,"%.12f",x);
-			fif(num);
-			it+=snprintf(it,num,"%.12f",x);
+		void print_f(const double x){
+			const uint64_t d = *((uint64_t*)&x);
+			const bool neg = d>>63;
+			int32_t e = (d>>52)&((1ull<<11)-1);
+			uint64_t m = d&((1ull<<52)-1);
+			if(e){
+				e-=1075;
+				m+=(1ull<<52);
+			} else e=-1074ll;
+			int32_t re=e;
+			if(e<0){
+				while(e++){
+					if(m&0xe000000000000000){
+						m>>=1;
+						re++;
+					} else m*=5;
+				}
+			} else {
+				while(e--){
+					if(m&0x8000000000000000) m/=5;
+					else {
+						m<<=1;
+						re--;
+					}
+				}
+			}
+			if(neg)print('-');
+			print(m);
+			print('e');
+			print(re);
 		}
 		void print(int8_t x){print_i(x);}
 		void print(int16_t x){print_i(x);}

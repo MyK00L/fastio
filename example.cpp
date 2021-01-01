@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
+#include <map>
 
 using namespace std;
 
@@ -29,11 +31,9 @@ Printer<> print;
 Scanner<> scan;
 
 int main() {
-	//close(STDIN_FILENO);
-	//close(STDOUT_FILENO);
-
-	int pfds[2];
-	pipe(pfds);
-	SPEED_TEST(100000,print(-12342134),print('\n');print.flush())
-
+	vector<double> m(16);
+	for(int i=0; i<16; ++i)m[i]=double(i)+0.012345;
+	print("yes\n",m,'\n');
+	return 0;
 }
+
