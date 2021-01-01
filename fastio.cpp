@@ -95,7 +95,7 @@ class Scanner{
 		void scan(uint32_t& x){scan_u(x);}
 		void scan(uint64_t& x){scan_u(x);}
 		void scan(unsigned long long& x){scan_u(x);}
-		void scan(float& x){scan_f(x);}
+		void scan(float& x){double d; scan_f(d); x=d;}
 		void scan(double& x){scan_f(x);}
 		void scan(long double& x){scan_f(x);}
 
