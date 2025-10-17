@@ -1,9 +1,8 @@
-#pragma GCC optimize("Ofast")
 #include <unistd.h>
 #include <fcntl.h>
+#include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include <cmath>
 #include <string>
 #include <algorithm>
 
@@ -143,10 +142,10 @@ class Printer {
 				it+=x.size();
 			}
 		}
+		static constexpr size_t siz = 24;
+		char b[siz];
 		template<typename T> void print_u(T x){
-			constexpr size_t siz = size_t(sizeof(T) * log10(256)) + 1;
 			uint8_t i=siz;
-			char b[siz];
 			do {
 				b[--i]=char(x%10+'0');
 				x=T(x/10);
@@ -156,9 +155,7 @@ class Printer {
 			it+=siz-i;
 		}
 		template<typename T> void print_i(T x){
-			constexpr size_t siz = size_t(sizeof(T) * log10(256)) + 2;
 			size_t i=siz;
-			char b[siz];
 			const bool neg=(x<0);
 			if(neg)x=-x;
 			do {

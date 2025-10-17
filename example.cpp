@@ -1,13 +1,8 @@
 #include "fastio.cpp"
 
-#include <cstdio>
-#include <cstdlib>
+#include <ctime>
 #include <unistd.h>
-#include <iostream>
 #include <vector>
-#include <algorithm>
-#include <random>
-#include <map>
 
 using namespace std;
 
