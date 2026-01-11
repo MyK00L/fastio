@@ -20,7 +20,7 @@ class Scanner{
 		Scanner& operator=(const Scanner&) = delete;
 		void fifss(const size_t x) {
 			// modify this if you want it to work with
-			// a lot of whitespace
+			// a lot of whitespace or with interactive problems
 			if(it+x>ed) {
 				it=copy(it,ed,buf);
 				ed=it+read(fd,it,BUFSIZE+buf-it);
