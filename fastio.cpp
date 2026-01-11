@@ -15,71 +15,79 @@ class Scanner{
 		char* it;
 		char* ed;
 		const int fd;
+		// FILE* fd;
 		Scanner(const Scanner&) = delete;
 		Scanner& operator=(const Scanner&) = delete;
-		void flush(){
-			if(it==ed){
-				ed=buf+read(fd,buf,BUFSIZE);
+		void fifss(const size_t x) {
+			// modify this if you want it to work with
+			// a lot of whitespace
+			if(it+x>ed) {
+				it=copy(it,ed,buf);
+				ed=it+read(fd,it,BUFSIZE+buf-it);
 				it=buf;
 			}
+			while(*it<=32){++it;}
+		}
+		void _flush() {
+			ed=buf+read(fd,buf,BUFSIZE);
+			// ed=buf+fread(buf,1,BUFSIZE,fd);
+			it=buf;
 		}
 		void ss(){
-			flush();
-			while(*it<=32){++it;flush();}
+			while(it!=ed && *it<=32) ++it;
+			if(it==ed) {
+				_flush();
+				ss();
+			}
 		}
 		void scan(char& x){ss();x=*(it++);}
 		void scan(string& x){
-			do{
-				ss();
+			x.clear();
+			ss();
+			do {
+				if(it==ed) _flush();
 				char * itbg=it;
 				while(it!=ed&&*it>32)++it;
 				x.append(itbg,it);
 			} while(it==ed);
 		}
 		template<typename T> void scan_u(T& x){
-			ss();
+			fifss(32);
 			x=0;
 			do{
 				x=T(x*10+*(it++)-'0');
-				flush();
 			} while(*it>32);
 		}
 		template<typename T> void scan_i(T& x){
-			ss();
+			fifss(32);
 			x=0;
 			bool sign=0;
-			if(*it=='-'){
+			if(*it=='-') {
 				sign=1;
 				++it;
-				flush();
 			}
 			do{
 				x=T(x*10+*(it++)-'0');
-				flush();
 			} while(*it>32);
 			if(sign)x=T(-x);
 		}
 		template<typename T> void scan_f(T& x){
-			ss();
+			fifss(64);
 			x=0;
 			bool sign=0;
 			if(*it=='-'){
 				sign=1;
 				++it;
-				flush();
 			}
 			while(*it>32 && *it!='.'){
 				x=x*T(10.0)+T(*(it++)-'0');
-				flush();
 			}
 			if(*it=='.'){
 				++it;
-				flush();
 				T e=T(0.1);
 				while(*it>32){
 					x=x+e*T(*(it++)-'0');
 					e=e*T(0.1);
-					flush();
 				};
 			}
 			if(sign)x=-x;
@@ -102,6 +110,7 @@ class Scanner{
 	public:
 		~Scanner(){}
 		Scanner(const int _fd=0):it(0),ed(0),fd(_fd){}
+		// Scanner(FILE* _fd=stdin):it(0),ed(0),fd(_fd){}
 		void operator()(){}
 		template<typename T, typename...R>
 			void operator()(T& a,R&...rest){
@@ -116,6 +125,7 @@ class Printer {
 		char buf[BUFSIZE];
 		char* it;
 		const int fd;
+		// FILE* fd;
 		void fif(const size_t x){
 			if(size_t(BUFSIZE+buf-it)<x)flush();
 		}
@@ -125,6 +135,7 @@ class Printer {
 			if(s>BUFSIZE/2){
 				flush();
 				write(fd,x,s);
+				// fwrite(x,1,s,fd);
 			} else {
 				fif(s);
 				copy(x,x+s,it);
@@ -136,6 +147,7 @@ class Printer {
 			if(x.size()>BUFSIZE/2){
 				flush();
 				write(fd,x.data(),x.size());
+				// fwrite(x.data(),1,x.size(),fd);
 			} else {
 				fif(x.size());
 				copy(x.begin(),x.end(),it);
@@ -221,8 +233,10 @@ class Printer {
 	public:
 		~Printer(){flush();}
 		Printer(const int _fd=1):it(buf),fd(_fd){}
+		// Printer(FILE* _fd=stdout):it(buf),fd(_fd){}
 		void flush(){
 			write(fd,buf,it-buf);
+			// fwrite(buf,1,it-buf,fd);
 			it=buf;
 		}
 		void operator()(){}
