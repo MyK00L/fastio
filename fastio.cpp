@@ -18,10 +18,25 @@ class Scanner{
 		// FILE* fd;
 		Scanner(const Scanner&) = delete;
 		Scanner& operator=(const Scanner&) = delete;
-		void fifss(const size_t x) {
-			// modify this if you want it to work with
-			// a lot of whitespace or with interactive problems
-			if(it+x>ed) {
+		bool has_whitespace() const {
+			char* i = it;
+			// align for platforms where you need to
+			// while((size_t(i)&0x7) && i<ed) {
+			// 	if(*(i++)<=32) return 1;
+			// }
+			while(ed-i>=8) {
+				uint64_t a = *(uint64_t*)i;
+				constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
+				constexpr uint64_t _128 = 0x8080808080808080;
+				if((~(a+_96))&_128) return 1;
+				i+=8;
+			}
+			while(i<ed) if(*(i++)<=32) return 1;
+			return 0;
+		}
+		void fifss() {
+			while(it<ed && *it<=32){++it;}
+			if(!has_whitespace()) {
 				it=copy(it,ed,buf);
 				ed=it+read(fd,it,BUFSIZE+buf-it);
 				it=buf;
@@ -52,14 +67,14 @@ class Scanner{
 			} while(it==ed);
 		}
 		template<typename T> void scan_u(T& x){
-			fifss(32);
+			fifss();
 			x=0;
 			do{
 				x=T(x*10+*(it++)-'0');
 			} while(*it>32);
 		}
 		template<typename T> void scan_i(T& x){
-			fifss(32);
+			fifss();
 			x=0;
 			bool sign=0;
 			if(*it=='-') {
@@ -72,7 +87,7 @@ class Scanner{
 			if(sign)x=T(-x);
 		}
 		template<typename T> void scan_f(T& x){
-			fifss(64);
+			fifss();
 			x=0;
 			bool sign=0;
 			if(*it=='-'){
