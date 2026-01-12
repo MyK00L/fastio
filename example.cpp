@@ -1,34 +1,26 @@
 #include "fastio.cpp"
 
-#include <ctime>
 #include <unistd.h>
-#include <vector>
 
 using namespace std;
-
-long gettime() {
-	timespec t;
-	clock_gettime(0, &t);
-	return t.tv_sec * (long)1e9 + t.tv_nsec;
-}
-
-#define SPEED_TEST(n, fn, end)\
-{\
-	size_t i = n;\
-	long __time = gettime();\
-	while (i--){fn;}\
-	end;\
-	__time = gettime() - __time;\
-	cerr<<to_string((double)__time / n)<<"\t"<<#fn<<endl;\
-}
 
 Printer<> print;
 Scanner<> scan;
 
 int main() {
-	vector<double> m(16);
-	for(int i=0; i<16; ++i)m[i]=double(i)+0.012345;
-	print("yes\n",m,'\n');
+	size_t n;
+	scan(n);
+	int64_t sum=0;
+	for(size_t i=0; i<n; ++i) {
+		int64_t x;
+		scan(x);
+		if(x==0) {
+			print(sum,'\n');
+			print.flush();
+		}
+		sum+=x;
+	}
+	print(sum,'\n');
 	return 0;
 }
 
