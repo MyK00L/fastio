@@ -1,5 +1,6 @@
 #include "fastio.cpp"
 
+#include <x86intrin.h>
 #include <vector>
 #include <array>
 #include <cassert>
@@ -18,18 +19,18 @@ struct Rng {
 		z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
 		return T(z ^ (z >> 31));
 	}
-	template<> char next<char>() {
-		uint64_t x = next<uint64_t>();
-		return 'a'+x%26;
-	}
-	template<> string next<string>() {
-		size_t siz = next<uint64_t>()%100000;
-		string s(siz,'a');
-		for(auto &c: s) c = next<char>();
-		return s;
-	}
 	Rng(uint64_t seed): x(seed) {}
 } rng(42);
+template<> char Rng::next<char>() {
+	uint64_t x = next<uint64_t>();
+	return 'a'+x%26;
+}
+template<> string Rng::next<string>() {
+	size_t siz = next<uint64_t>()%100000;
+	string s(siz,'a');
+	for(auto &c: s) c = next<char>();
+	return s;
+}
 
 Printer eprint(2);
 
@@ -68,12 +69,11 @@ array<uint64_t,2> bench_pair(const vector<T>& v) {
 	return {tr,tw};
 }
 
-void test_int_small() {
+array<uint64_t,2> test_int_small() {
 	vector<int> v;
 	v.reserve(200001);
 	for(int i=-100000; i<=100000; ++i) v.push_back(i);
-	auto [tr,tw] = bench_pair(v);
-	eprint("tr=",tr," tw=",tw,'\n');
+	return bench_pair(v);
 }
 
 template<typename T, const size_t N>
@@ -96,7 +96,7 @@ array<uint64_t,2> bench_avg(function<array<uint64_t,2>()> f, const size_t num) {
 }
 
 int main() {
-	auto [tr,tw] = bench_avg(bench_random<int64_t,100000>, 20);
+	auto [tr,tw] = bench_avg(test_int_small, 20);
 	eprint("tr=",tr," tw=",tw,'\n');
 	return 0;
 }
