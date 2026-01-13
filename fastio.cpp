@@ -18,14 +18,15 @@ class Scanner{
 		// FILE* fd;
 		Scanner(const Scanner&) = delete;
 		Scanner& operator=(const Scanner&) = delete;
-		bool has_whitespace() const {
+		bool has_whitespace() const noexcept {
 			char* i = it;
 			// align for platforms where you need to
 			// while((size_t(i)&0x7) && i<ed) {
 			// 	if(*(i++)<=32) return 1;
 			// }
 			while(ed-i>=8) {
-				uint64_t a = *(uint64_t*)i;
+				uint64_t a = 0;//*(uint64_t*)i;
+				std::memcpy(&a, i, sizeof(a));
 				constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
 				constexpr uint64_t _128 = 0x8080808080808080;
 				if((~(a+_96))&_128) return 1;
@@ -34,7 +35,7 @@ class Scanner{
 			while(i<ed) if(*(i++)<=32) return 1;
 			return 0;
 		}
-		void fifss() {
+		void fifss() noexcept {
 			while(it<ed && *it<=32){++it;}
 			if(!has_whitespace()) {
 				it=copy(it,ed,buf);
@@ -43,20 +44,20 @@ class Scanner{
 			}
 			while(*it<=32){++it;}
 		}
-		void _flush() {
+		void _flush() noexcept {
 			ed=buf+read(fd,buf,BUFSIZE);
 			// ed=buf+fread(buf,1,BUFSIZE,fd);
 			it=buf;
 		}
-		void ss(){
+		void ss() noexcept {
 			while(it!=ed && *it<=32) ++it;
 			if(it==ed) {
 				_flush();
 				ss();
 			}
 		}
-		void scan(char& x){ss();x=*(it++);}
-		void scan(string& x){
+		void scan(char& x) noexcept {ss();x=*(it++);}
+		void scan(string& x) noexcept {
 			x.clear();
 			ss();
 			do {
@@ -66,27 +67,60 @@ class Scanner{
 				x.append(itbg,it);
 			} while(it==ed);
 		}
-		template<typename T> void scan_u(T& x){
-			fifss();
-			x=0;
-			do{
-				x=T(x*10+*(it++)-'0');
-			} while(*it>32);
+		bool has_space(const uint64_t x) const noexcept {
+			constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
+			constexpr uint64_t _128 = 0x8080808080808080;
+			return (~(x+_96))&_128;
 		}
-		template<typename T> void scan_i(T& x){
-			fifss();
+		inline void trick8(uint64_t& x) noexcept {
+			uint64_t l=(x&0x0f000f000f000f00)>>8;
+			uint64_t u=(x&0x000f000f000f000f)*10;
+			x=l+u;
+			l=(x&0x00ff000000ff0000)>>16;
+			u=(x&0x000000ff000000ff)*100;
+			x=l+u;
+			l=(x&0x0000ffff00000000)>>32;
+			u=(x&0x000000000000ffff)*10000;
+			x=l+u;
+		}
+		template<typename T> inline void scan_u_after_fifss(T& x) noexcept {
 			x=0;
+			if(ed-it>=8) {
+				uint64_t a=0;
+				std::memcpy(&a, it, sizeof(a));
+				if(!has_space(a)) {
+					trick8(a);
+					x=a;
+					it+=8;
+					if(ed-it>=8) {
+						std::memcpy(&a, it, sizeof(a));
+						if(!has_space(a)) {
+							trick8(a);
+							x=x*100000000+a;
+							it+=8;
+						}
+					}
+				}
+			}
+			while(*it>32) {
+				x=T(x*10+(*it++&0xf));
+			}
+		}
+		template<typename T> void scan_u(T& x) noexcept {
+			fifss();
+			scan_u_after_fifss(x);
+		}
+		template<typename T> void scan_i(T& x) noexcept {
+			fifss();
 			bool sign=0;
 			if(*it=='-') {
 				sign=1;
 				++it;
 			}
-			do{
-				x=T(x*10+*(it++)-'0');
-			} while(*it>32);
-			if(sign)x=T(-x);
+			scan_u_after_fifss(x);
+			if(sign) x=T(-x);
 		}
-		template<typename T> void scan_f(T& x){
+		template<typename T> void scan_f(T& x) noexcept {
 			fifss();
 			x=0;
 			bool sign=0;
@@ -95,40 +129,40 @@ class Scanner{
 				++it;
 			}
 			while(*it>32 && *it!='.'){
-				x=x*T(10.0)+T(*(it++)-'0');
+				x=x*T(10.0)+T(*it++&0xf);
 			}
 			if(*it=='.'){
 				++it;
 				T e=T(0.1);
 				while(*it>32){
-					x=x+e*T(*(it++)-'0');
+					x=x+e*T(*it++&0xf);
 					e=e*T(0.1);
 				};
 			}
 			if(sign)x=-x;
 		}
-		void scan(int8_t& x){scan_i(x);}
-		void scan(int16_t& x){scan_i(x);}
-		void scan(int32_t& x){scan_i(x);}
-		void scan(int64_t& x){scan_i(x);}
-		void scan(long long& x){scan_i(x);}
-		void scan(uint8_t& x){scan_u(x);}
-		void scan(uint16_t& x){scan_u(x);}
-		void scan(uint32_t& x){scan_u(x);}
-		void scan(uint64_t& x){scan_u(x);}
-		void scan(unsigned long long& x){scan_u(x);}
-		void scan(float& x){double d; scan_f(d); x=d;}
-		void scan(double& x){scan_f(x);}
-		void scan(long double& x){scan_f(x);}
+		void scan(int8_t& x) noexcept {scan_i(x);}
+		void scan(int16_t& x) noexcept {scan_i(x);}
+		void scan(int32_t& x) noexcept {scan_i(x);}
+		void scan(int64_t& x) noexcept {scan_i(x);}
+		void scan(long long& x) noexcept {scan_i(x);}
+		void scan(uint8_t& x) noexcept {scan_u(x);}
+		void scan(uint16_t& x) noexcept {scan_u(x);}
+		void scan(uint32_t& x) noexcept {scan_u(x);}
+		void scan(uint64_t& x) noexcept {scan_u(x);}
+		void scan(unsigned long long& x) noexcept {scan_u(x);}
+		void scan(float& x) noexcept {double d; scan_f(d); x=d;}
+		void scan(double& x) noexcept {scan_f(x);}
+		void scan(long double& x) noexcept {scan_f(x);}
 
-		template<typename T> void scan(T& x){for(auto &i:x)scan(i);}
+		template<typename T> void scan(T& x) noexcept {for(auto &i:x)scan(i);}
 	public:
-		~Scanner(){}
-		Scanner(const int _fd=0):it(0),ed(0),fd(_fd){}
+		~Scanner() noexcept {}
+		Scanner(const int _fd=0) noexcept :it(0),ed(0),fd(_fd){}
 		// Scanner(FILE* _fd=stdin):it(0),ed(0),fd(_fd){}
-		void operator()(){}
+		void operator()() noexcept {}
 		template<typename T, typename...R>
-			void operator()(T& a,R&...rest){
+			void operator()(T& a,R&...rest) noexcept {
 				scan(a);
 				operator()(rest...);
 			}
@@ -141,11 +175,11 @@ class Printer {
 		char* it;
 		const int fd;
 		// FILE* fd;
-		void fif(const size_t x){
+		void fif(const size_t x) noexcept {
 			if(size_t(BUFSIZE+buf-it)<x)flush();
 		}
-		void print(const char x){fif(1);*(it++)=x;}
-		void print(char* const x){
+		void print(const char x) noexcept {fif(1);*(it++)=x;}
+		void print(char* const x) noexcept {
 			size_t s = strlen(x);
 			if(s>BUFSIZE/2){
 				flush();
@@ -157,8 +191,8 @@ class Printer {
 				it+=s;
 			}
 		}
-		void print(const char* const x){print((char*)x);}
-		void print(const string& x){
+		void print(const char* const x) noexcept {print((char*)x);}
+		void print(const string& x) noexcept {
 			if(x.size()>BUFSIZE/2){
 				flush();
 				write(fd,x.data(),x.size());
@@ -171,22 +205,22 @@ class Printer {
 		}
 		static constexpr size_t siz = 24;
 		char b[siz];
-		template<typename T> void print_u(T x){
+		template<typename T> void print_u(T x) noexcept {
 			uint8_t i=siz;
 			do {
-				b[--i]=char(x%10+'0');
+				b[--i]=char((x%10)|48);
 				x=T(x/10);
 			}while(x);
 			fif(siz-i);
 			copy(b+i,b+siz,it);
 			it+=siz-i;
 		}
-		template<typename T> void print_i(T x){
+		template<typename T> void print_i(T x) noexcept {
 			size_t i=siz;
 			const bool neg=(x<0);
 			if(neg)x=-x;
 			do {
-				b[--i]=char(x%10+'0');
+				b[--i]=char((x%10)|48);
 				x=T(x/10);
 			}while(x);
 			if(neg)b[--i]='-';
@@ -194,8 +228,9 @@ class Printer {
 			copy(b+i,b+siz,it);
 			it+=siz-i;
 		}
-		void print_f(const double x){
-			const uint64_t d = *((uint64_t*)&x);
+		void print_f(const double x) noexcept {
+			// const uint64_t d = *((uint64_t*)&x);
+			const uint64_t d = __builtin_bit_cast(uint64_t,x);
 			const bool neg = d>>63;
 			int32_t e = (d>>52)&((1ull<<11)-1);
 			uint64_t m = d&((1ull<<52)-1);
@@ -225,38 +260,38 @@ class Printer {
 			print('e');
 			print(re);
 		}
-		void print(int8_t x){print_i(x);}
-		void print(int16_t x){print_i(x);}
-		void print(int32_t x){print_i(x);}
-		void print(int64_t x){print_i(x);}
-		void print(long long x){print_i(x);}
-		void print(uint8_t x){print_u(x);}
-		void print(uint16_t x){print_u(x);}
-		void print(uint32_t x){print_u(x);}
-		void print(uint64_t x){print_u(x);}
-		void print(unsigned long long x){print_u(x);}
-		void print(const float x){print_f(x);}
-		void print(const double x){print_f(x);}
-		void print(const long double x){print_f(x);}
+		void print(int8_t x) noexcept {print_i(x);}
+		void print(int16_t x) noexcept {print_i(x);}
+		void print(int32_t x) noexcept {print_i(x);}
+		void print(int64_t x) noexcept {print_i(x);}
+		void print(long long x) noexcept {print_i(x);}
+		void print(uint8_t x) noexcept {print_u(x);}
+		void print(uint16_t x) noexcept {print_u(x);}
+		void print(uint32_t x) noexcept {print_u(x);}
+		void print(uint64_t x) noexcept {print_u(x);}
+		void print(unsigned long long x) noexcept {print_u(x);}
+		void print(const float x) noexcept {print_f(x);}
+		void print(const double x) noexcept {print_f(x);}
+		void print(const long double x) noexcept {print_f(x);}
 
-		template<typename T> void print(const T& x){
+		template<typename T> void print(const T& x) noexcept {
 			for(auto &i:x){
 				print(i);
 				print(' ');
 			}
 		}
 	public:
-		~Printer(){flush();}
-		Printer(const int _fd=1):it(buf),fd(_fd){}
+		~Printer() noexcept {flush();}
+		Printer(const int _fd=1) noexcept :it(buf),fd(_fd){}
 		// Printer(FILE* _fd=stdout):it(buf),fd(_fd){}
-		void flush(){
+		void flush() noexcept {
 			write(fd,buf,it-buf);
 			// fwrite(buf,1,it-buf,fd);
 			it=buf;
 		}
-		void operator()(){}
+		void operator()() noexcept {}
 		template<typename T, typename...R>
-			void operator()(T&& a,R&&...rest){
+			void operator()(T&& a,R&&...rest) noexcept {
 				print(a);
 				operator()(rest...);
 			}
