@@ -35,6 +35,17 @@ class Scanner{
 			while(i<ed) if(*(i++)<=32) return 1;
 			return 0;
 		}
+		// faster fifss, does not work with interactive problems, in the shell, or with a lot of whitespace	
+		/*
+		void fifss(const size_t x=32) noexcept {
+			if(it+x>ed) {
+				it=copy(it,ed,buf);
+				ed=it+read(fd,it,BUFSIZE+buf-it);
+				it=buf;
+			}
+			while(*it<=32){++it;}
+		}
+		*/
 		void fifss() noexcept {
 			while(it<ed && *it<=32){++it;}
 			if(!has_whitespace()) {
