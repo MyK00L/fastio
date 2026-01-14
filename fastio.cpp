@@ -20,12 +20,8 @@ class Scanner{
 		Scanner& operator=(const Scanner&) = delete;
 		bool has_whitespace() const noexcept {
 			char* i = it;
-			// align for platforms where you need to
-			// while((size_t(i)&0x7) && i<ed) {
-			// 	if(*(i++)<=32) return 1;
-			// }
 			while(ed-i>=8) {
-				uint64_t a = 0;//*(uint64_t*)i;
+				uint64_t a = 0;
 				std::memcpy(&a, i, sizeof(a));
 				constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
 				constexpr uint64_t _128 = 0x8080808080808080;
@@ -35,26 +31,27 @@ class Scanner{
 			while(i<ed) if(*(i++)<=32) return 1;
 			return 0;
 		}
-		// faster fifss, does not work with interactive problems, in the shell, or with a lot of whitespace	
-		/*
+#ifdef FAST_FIFSS
+		// faster fifss, does not work with interactive problems, in the shell, or with a lot of whitespace
 		void fifss(const size_t x=32) noexcept {
 			if(it+x>ed) {
 				it=copy(it,ed,buf);
 				ed=it+read(fd,it,BUFSIZE+buf-it);
 				it=buf;
 			}
-			while(*it<=32){++it;}
+			while(*it<=32)++it;
 		}
-		*/
+#else
 		void fifss() noexcept {
-			while(it<ed && *it<=32){++it;}
+			while(it<ed && *it<=32)++it;
 			if(!has_whitespace()) {
 				it=copy(it,ed,buf);
 				ed=it+read(fd,it,BUFSIZE+buf-it);
 				it=buf;
 			}
-			while(*it<=32){++it;}
+			while(*it<=32)++it;
 		}
+#endif
 		void _flush() noexcept {
 			ed=buf+read(fd,buf,BUFSIZE);
 			// ed=buf+fread(buf,1,BUFSIZE,fd);
@@ -78,39 +75,51 @@ class Scanner{
 				x.append(itbg,it);
 			} while(it==ed);
 		}
-		bool has_space(const uint64_t x) const noexcept {
+		static inline bool has_space8(const uint64_t x) noexcept {
 			constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
 			constexpr uint64_t _128 = 0x8080808080808080;
 			return (~(x+_96))&_128;
 		}
-		inline void trick8(uint64_t& x) noexcept {
-			uint64_t l=(x&0x0f000f000f000f00)>>8;
-			uint64_t u=(x&0x000f000f000f000f)*10;
-			x=l+u;
-			l=(x&0x00ff000000ff0000)>>16;
-			u=(x&0x000000ff000000ff)*100;
-			x=l+u;
-			l=(x&0x0000ffff00000000)>>32;
-			u=(x&0x000000000000ffff)*10000;
-			x=l+u;
+		static inline bool has_space4(const uint32_t x) noexcept {
+			constexpr uint64_t _96 = 0x5f5f5f5f;
+			constexpr uint64_t _128 = 0x80808080;
+			return (~(x+_96))&_128;
+		}
+		static inline void trick8(uint64_t& x) noexcept {
+			x = (x & 0x0F0F0F0F0F0F0F0F) * 2561 >> 8;
+			x = (x & 0x00FF00FF00FF00FF) * 6553601 >> 16;
+			x = (x & 0x0000FFFF0000FFFF) * 42949672960001 >> 32;
+		}
+		static inline void trick4(uint32_t& x) noexcept {
+			x = (x & 0x0F0F0F0F) * 2561 >> 8;
+			x = (x & 0x00FF00FF) * 6553601 >> 16;
 		}
 		template<typename T> inline void scan_u_after_fifss(T& x) noexcept {
 			x=0;
 			if(ed-it>=8) {
 				uint64_t a=0;
 				std::memcpy(&a, it, sizeof(a));
-				if(!has_space(a)) {
+				if(!has_space8(a)) {
 					trick8(a);
 					x=a;
 					it+=8;
 					if(ed-it>=8) {
 						std::memcpy(&a, it, sizeof(a));
-						if(!has_space(a)) {
+						if(!has_space8(a)) {
 							trick8(a);
-							x=x*100000000+a;
+							x=x*100000000+T(a);
 							it+=8;
 						}
 					}
+				}
+			}
+			if(ed-it>=4) {
+				uint32_t a=0;
+				std::memcpy(&a, it, sizeof(a));
+				if(!has_space4(a)) {
+					trick4(a);
+					x=x*10000+T(a);
+					it+=4;
 				}
 			}
 			while(*it>32) {
@@ -240,7 +249,6 @@ class Printer {
 			it+=siz-i;
 		}
 		void print_f(const double x) noexcept {
-			// const uint64_t d = *((uint64_t*)&x);
 			const uint64_t d = __builtin_bit_cast(uint64_t,x);
 			const bool neg = d>>63;
 			int32_t e = (d>>52)&((1ull<<11)-1);

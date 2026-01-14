@@ -71,8 +71,8 @@ array<uint64_t,2> bench_pair(const vector<T>& v) {
 
 array<uint64_t,2> test_int_small() {
 	vector<int> v;
-	v.reserve(200001);
-	for(int i=-100000; i<=100000; ++i) v.push_back(i);
+	v.reserve(13001);
+	for(int i=-6500; i<=6500; ++i) v.push_back(i);
 	return bench_pair(v);
 }
 
@@ -96,8 +96,14 @@ array<uint64_t,2> bench_avg(function<array<uint64_t,2>()> f, const size_t num) {
 }
 
 int main() {
-	auto [tr,tw] = bench_avg(test_int_small, 20);
-	eprint("tr=",tr," tw=",tw,'\n');
+	{
+		auto [tr,tw] = bench_avg(bench_random<uint64_t,3000>, 2048);
+		eprint("u64: tr=",tr," tw=",tw,'\n');
+	}
+	{
+		auto [tr,tw] = bench_avg(test_int_small, 2048);
+		eprint("sml: tr=",tr," tw=",tw,'\n');
+	}
 	return 0;
 }
 
