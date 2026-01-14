@@ -1,9 +1,10 @@
+#define NDEBUG
+
 #include "fastio.cpp"
 
 #include <x86intrin.h>
 #include <vector>
 #include <array>
-#include <cassert>
 #include <cstdio>
 #include <string>
 #include <functional>
@@ -47,7 +48,7 @@ void test_scan(const vector<T>& v, FILE* file) {
 	auto s = v[0];
 	for(const auto& x:v) {
 		scan(s);
-		assert(x==s);
+		if(x!=s) [[unlikely]]  __builtin_trap();
 	}
 }
 

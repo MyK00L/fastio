@@ -1,8 +1,6 @@
 #include <unistd.h>
-#include <fcntl.h>
 #include <cstdint>
 #include <cstring>
-#include <cstdio>
 #include <string>
 #include <algorithm>
 
@@ -33,7 +31,8 @@ class Scanner{
 		}
 #ifdef FAST_FIFSS
 		// faster fifss, does not work with interactive problems, in the shell, or with a lot of whitespace
-		void fifss(const size_t x=32) noexcept {
+		void fifss() noexcept {
+			constexpr size_t x = 32;
 			if(it+x>ed) {
 				it=copy(it,ed,buf);
 				ed=it+read(fd,it,BUFSIZE+buf-it);
@@ -86,6 +85,7 @@ class Scanner{
 			return (~(x+_96))&_128;
 		}
 		static inline void trick8(uint64_t& x) noexcept {
+			// x = ((x & 0x0f000f000f000f00) >> 8)+((x & 0x000f000f000f000f) * 10); // 1 less imul, but slower...
 			x = (x & 0x0F0F0F0F0F0F0F0F) * 2561 >> 8;
 			x = (x & 0x00FF00FF00FF00FF) * 6553601 >> 16;
 			x = (x & 0x0000FFFF0000FFFF) * 42949672960001 >> 32;
