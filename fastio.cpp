@@ -80,8 +80,8 @@ class Scanner{
 			return (~(x+_96))&_128;
 		}
 		static inline bool has_space4(const uint32_t x) noexcept {
-			constexpr uint64_t _96 = 0x5f5f5f5f;
-			constexpr uint64_t _128 = 0x80808080;
+			constexpr uint32_t _96 = 0x5f5f5f5f;
+			constexpr uint32_t _128 = 0x80808080;
 			return (~(x+_96))&_128;
 		}
 		static inline void trick8(uint64_t& x) noexcept {
