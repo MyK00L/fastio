@@ -16,15 +16,29 @@ class Scanner{
 		// FILE* fd;
 		Scanner(const Scanner&) = delete;
 		Scanner& operator=(const Scanner&) = delete;
+		static inline bool has_space8(const uint64_t x) noexcept {
+			constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
+			constexpr uint64_t _128 = 0x8080808080808080;
+			return (~(x+_96))&_128;
+		}
+		static inline bool has_space4(const uint32_t x) noexcept {
+			constexpr uint32_t _96 = 0x5f5f5f5f;
+			constexpr uint32_t _128 = 0x80808080;
+			return (~(x+_96))&_128;
+		}
 		bool has_whitespace() const noexcept {
 			char* i = it;
 			while(ed-i>=8) {
 				uint64_t a = 0;
 				std::memcpy(&a, i, sizeof(a));
-				constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
-				constexpr uint64_t _128 = 0x8080808080808080;
-				if((~(a+_96))&_128) return 1;
+				if(has_space8(a)) return 1;
 				i+=8;
+			}
+			while(ed-i>=4) {
+				uint32_t a = 0;
+				std::memcpy(&a, i, sizeof(a));
+				if(has_space4(a)) return 1;
+				i+=4;
 			}
 			while(i<ed) if(*(i++)<=32) return 1;
 			return 0;
@@ -73,16 +87,6 @@ class Scanner{
 				while(it!=ed&&*it>32)++it;
 				x.append(itbg,it);
 			} while(it==ed);
-		}
-		static inline bool has_space8(const uint64_t x) noexcept {
-			constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
-			constexpr uint64_t _128 = 0x8080808080808080;
-			return (~(x+_96))&_128;
-		}
-		static inline bool has_space4(const uint32_t x) noexcept {
-			constexpr uint32_t _96 = 0x5f5f5f5f;
-			constexpr uint32_t _128 = 0x80808080;
-			return (~(x+_96))&_128;
 		}
 		static inline void trick8(uint64_t& x) noexcept {
 			// x = ((x & 0x0f000f000f000f00) >> 8)+((x & 0x000f000f000f000f) * 10); // 1 less imul, but slower...
