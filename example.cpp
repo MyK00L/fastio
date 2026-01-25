@@ -1,5 +1,6 @@
 #include "fastio.cpp"
 
+#include <vector>
 #include <unistd.h>
 
 using namespace std;
@@ -7,7 +8,21 @@ using namespace std;
 Printer<> print;
 Scanner<> scan;
 
+template<typename T>
+void tt() {
+	if(false) {
+		T t;
+		scan(t);
+		print(t);
+	}
+}
+
 int main() {
+	tt<int8_t>();
+	tt<char>();
+	tt<uint64_t>();
+	tt<string>();
+	tt<vector<vector<long>>>();
 	size_t n;
 	scan(n);
 	int64_t sum=0;

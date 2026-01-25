@@ -105,13 +105,13 @@ class Scanner{
 				std::memcpy(&a, it, sizeof(a));
 				if(!has_space8(a)) {
 					trick8(a);
-					x=a;
+					x=T(a);
 					it+=8;
 					if(ed-it>=8) {
 						std::memcpy(&a, it, sizeof(a));
 						if(!has_space8(a)) {
 							trick8(a);
-							x=x*100000000+T(a);
+							x=T(x*T(100000000)+T(a));
 							it+=8;
 						}
 					}
@@ -122,7 +122,7 @@ class Scanner{
 				std::memcpy(&a, it, sizeof(a));
 				if(!has_space4(a)) {
 					trick4(a);
-					x=x*10000+T(a);
+					x=T(x*T(10000)+T(a));
 					it+=4;
 				}
 			}
@@ -308,7 +308,7 @@ class Printer {
 		Printer(const int _fd=1) noexcept :it(buf),fd(_fd){}
 		// Printer(FILE* _fd=stdout):it(buf),fd(_fd){}
 		void flush() noexcept {
-			write(fd,buf,it-buf);
+			std::ignore = write(fd,buf,it-buf);
 			// fwrite(buf,1,it-buf,fd);
 			it=buf;
 		}
