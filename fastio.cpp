@@ -144,27 +144,7 @@ class Scanner{
 			scan_u_after_fifss(x);
 			if(sign) x=T(-x);
 		}
-		template<typename T> void scan_f(T& x) noexcept {
-			fifss();
-			x=0;
-			bool sign=0;
-			if(*it=='-'){
-				sign=1;
-				++it;
-			}
-			while(*it>32 && *it!='.'){
-				x=x*T(10.0)+T(*it++&0xf);
-			}
-			if(*it=='.'){
-				++it;
-				T e=T(0.1);
-				while(*it>32){
-					x=x+e*T(*it++&0xf);
-					e=e*T(0.1);
-				};
-			}
-			if(sign)x=-x;
-		}
+
 		void scan(int8_t& x) noexcept {scan_i(x);}
 		void scan(int16_t& x) noexcept {scan_i(x);}
 		void scan(int32_t& x) noexcept {scan_i(x);}
@@ -175,9 +155,11 @@ class Scanner{
 		void scan(uint32_t& x) noexcept {scan_u(x);}
 		void scan(uint64_t& x) noexcept {scan_u(x);}
 		void scan(unsigned long long& x) noexcept {scan_u(x);}
-		void scan(float& x) noexcept {double d; scan_f(d); x=d;}
-		void scan(double& x) noexcept {scan_f(x);}
-		void scan(long double& x) noexcept {scan_f(x);}
+
+		template<typename T> void scan_f(T& x) noexcept;
+		void scan(float& x) noexcept;
+		void scan(double& x) noexcept;
+		void scan(long double& x) noexcept;
 
 		template<typename T> void scan(T& x) noexcept {for(auto &i:x)scan(i);}
 	public:
@@ -228,17 +210,6 @@ class Printer {
 			}
 		}
 
-		static constexpr char i2a[] =
-			"00010203040506070809"
-			"10111213141516171819"
-			"20212223242526272829"
-			"30313233343536373839"
-			"40414243444546474849"
-			"50515253545556575859"
-			"60616263646566676869"
-			"70717273747576777879"
-			"80818283848586878889"
-			"90919293949596979899";
 		template<typename T> static uint8_t ndigits(T x) noexcept {
 			if(!x) return 1;
 			uint8_t ans=0;
@@ -258,6 +229,7 @@ class Printer {
 			return ans;
 		}
 		template<typename T> void print_u_afterfif(T x, const uint8_t nd0) noexcept {
+			static constexpr char i2a[201] = "00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
 			uint8_t nd = nd0;
 			while (x>=100000000) {
 				uint32_t _0 = x % 100000000;
@@ -305,37 +277,6 @@ class Printer {
 			}
 			print_u_afterfif(x,ndigits(x));
 		}
-		void print_f(const double x) noexcept {
-			const uint64_t d = __builtin_bit_cast(uint64_t,x);
-			const bool neg = d>>63;
-			int32_t e = (d>>52)&((1ull<<11)-1);
-			uint64_t m = d&((1ull<<52)-1);
-			if(e){
-				e-=1075;
-				m+=(1ull<<52);
-			} else e=-1074ll;
-			int32_t re=e;
-			if(e<0){
-				while(e++){
-					if(m&0xe000000000000000){
-						m>>=1;
-						re++;
-					} else m*=5;
-				}
-			} else {
-				while(e--){
-					if(m&0x8000000000000000) m/=5;
-					else {
-						m<<=1;
-						re--;
-					}
-				}
-			}
-			if(neg)print('-');
-			print(m);
-			print('e');
-			print(re);
-		}
 		void print(int8_t x) noexcept {print_i(x);}
 		void print(int16_t x) noexcept {print_i(x);}
 		void print(int32_t x) noexcept {print_i(x);}
@@ -346,9 +287,11 @@ class Printer {
 		void print(uint32_t x) noexcept {print_u(x);}
 		void print(uint64_t x) noexcept {print_u(x);}
 		void print(unsigned long long x) noexcept {print_u(x);}
-		void print(const float x) noexcept {print_f(x);}
-		void print(const double x) noexcept {print_f(x);}
-		void print(const long double x) noexcept {print_f(x);}
+
+		void print_f(const double x) noexcept;
+		void print(const float x) noexcept;
+		void print(const double x) noexcept;
+		void print(const long double x) noexcept;
 
 		template<typename T> void print(const T& x) noexcept {
 			for(auto &i:x){

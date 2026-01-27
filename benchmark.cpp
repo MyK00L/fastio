@@ -1,6 +1,7 @@
 #define NDEBUG
 
 #include "fastio.cpp"
+#include "fastio_float.cpp"
 
 #include <x86intrin.h>
 #include <vector>
