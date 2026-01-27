@@ -70,10 +70,11 @@ array<uint64_t,2> bench_pair(const vector<T>& v) {
 	return {tr,tw};
 }
 
+template<typename T>
 array<uint64_t,2> test_int_small() {
-	vector<int> v;
+	vector<T> v;
 	v.reserve(13001);
-	for(int i=-6500; i<=6500; ++i) v.push_back(i);
+	for(T i=-6500; i<=6500; ++i) v.push_back(i);
 	return bench_pair(v);
 }
 
@@ -102,7 +103,7 @@ int main() {
 		eprint("u64: tr=",tr," tw=",tw,'\n');
 	}
 	{
-		auto [tr,tw] = bench_avg(test_int_small, 2048);
+		auto [tr,tw] = bench_avg(test_int_small<int64_t>, 2048);
 		eprint("sml: tr=",tr," tw=",tw,'\n');
 	}
 	return 0;

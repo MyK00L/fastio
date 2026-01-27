@@ -89,7 +89,7 @@ class Scanner{
 			} while(it==ed);
 		}
 		static inline void trick8(uint64_t& x) noexcept {
-			// x = ((x & 0x0f000f000f000f00) >> 8)+((x & 0x000f000f000f000f) * 10); // 1 less imul, but slower...
+			// x = ((x & 0x0f000f000f000f00) >> 8)+((x & 0x000f000f000f000f) * 10); // 1 less imul, but slower(?)...
 			x = (x & 0x0F0F0F0F0F0F0F0F) * 2561 >> 8;
 			x = (x & 0x00FF00FF00FF00FF) * 6553601 >> 16;
 			x = (x & 0x0000FFFF0000FFFF) * 42949672960001 >> 32;
@@ -227,30 +227,83 @@ class Printer {
 				it+=x.size();
 			}
 		}
-		static constexpr size_t siz = 24;
-		char b[siz];
+
+		static constexpr char i2a[] =
+			"00010203040506070809"
+			"10111213141516171819"
+			"20212223242526272829"
+			"30313233343536373839"
+			"40414243444546474849"
+			"50515253545556575859"
+			"60616263646566676869"
+			"70717273747576777879"
+			"80818283848586878889"
+			"90919293949596979899";
+		template<typename T> static uint8_t ndigits(T x) noexcept {
+			if(!x) return 1;
+			uint8_t ans=0;
+			while(x>=10000000) {
+				ans+=8;
+				x/=100000000;
+			}
+			if(x>=1000) {
+				ans+=4;
+				x/=10000;
+			}
+			if(x>=10) {
+				ans+=2;
+				x/=100;
+			}
+			if(x) ans+=1;
+			return ans;
+		}
+		template<typename T> void print_u_afterfif(T x, const uint8_t nd0) noexcept {
+			uint8_t nd = nd0;
+			while (x>=100000000) {
+				uint32_t _0 = x % 100000000;
+				x /= 100000000;
+				uint32_t _1 = _0 % 10000;
+				_0 /= 10000;
+				uint32_t _00_2 = (_0 / 100) * 2;
+				uint32_t _01_2 = (_0 % 100) * 2;
+				uint32_t _10_2 = (_1 / 100) * 2;
+				uint32_t _11_2 = (_1 % 100) * 2;
+				memcpy(it+nd-8, i2a+_00_2, 2);
+				memcpy(it+nd-6, i2a+_01_2, 2);
+				memcpy(it+nd-4, i2a+_10_2, 2);
+				memcpy(it+nd-2, i2a+_11_2, 2);
+				nd -= 8;
+			}
+			if(x >= 10000) {
+				uint32_t _0 = x % 10000;
+				x /= 10000;
+				uint32_t _1 = _0%100;
+				_0/=100;
+				memcpy(it+nd-4, i2a+_0*2, 2);
+				memcpy(it+nd-2, i2a+_1*2, 2);
+				nd -= 4;
+			}
+			if(x >= 100) {
+				uint32_t _0 = x%100;
+				x /= 100;
+				memcpy(it+nd-2, i2a+_0*2, 2);
+				nd -= 2;
+			}
+			if(x >= 10) memcpy(it+nd-2, i2a+x*2, 2);
+			else it[nd-1] = '0' + x;
+			it+=nd0;
+		}
 		template<typename T> void print_u(T x) noexcept {
-			uint8_t i=siz;
-			do {
-				b[--i]=char((x%10)|48);
-				x=T(x/10);
-			}while(x);
-			fif(siz-i);
-			copy(b+i,b+siz,it);
-			it+=siz-i;
+			fif(22);
+			print_u_afterfif(x,ndigits(x));
 		}
 		template<typename T> void print_i(T x) noexcept {
-			size_t i=siz;
-			const bool neg=(x<0);
-			if(neg)x=-x;
-			do {
-				b[--i]=char((x%10)|48);
-				x=T(x/10);
-			}while(x);
-			if(neg)b[--i]='-';
-			fif(siz-i);
-			copy(b+i,b+siz,it);
-			it+=siz-i;
+			fif(22);
+			if(x<0) {
+				*(it++)='-';
+				x=-x;
+			}
+			print_u_afterfif(x,ndigits(x));
 		}
 		void print_f(const double x) noexcept {
 			const uint64_t d = __builtin_bit_cast(uint64_t,x);
