@@ -70,7 +70,7 @@ class Scanner{
 			// ed=buf+fread(buf,1,BUFSIZE,fd);
 			it=buf;
 		}
-		void ss() noexcept {
+		inline void ss() noexcept {
 			while(it!=ed && *it<=32) ++it;
 			if(it==ed) {
 				_flush();
@@ -84,7 +84,13 @@ class Scanner{
 			do {
 				if(it==ed) _flush();
 				char * itbg=it;
-				while(it!=ed&&*it>32)++it;
+				while(ed-it>=8) {
+					uint64_t a;
+					std::memcpy(&a, it, sizeof(a));
+					if(has_space8(a)) break;
+					it+=8;
+				}
+				while(it!=ed&&*it>32) ++it;
 				x.append(itbg,it);
 			} while(it==ed);
 		}

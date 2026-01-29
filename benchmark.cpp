@@ -28,7 +28,7 @@ template<> char Rng::next<char>() {
 	return 'a'+x%26;
 }
 template<> string Rng::next<string>() {
-	size_t siz = next<uint64_t>()%100000;
+	size_t siz = 1+(next<uint64_t>()%42);
 	string s(siz,'a');
 	for(auto &c: s) c = next<char>();
 	return s;
@@ -100,11 +100,11 @@ array<uint64_t,2> bench_avg(function<array<uint64_t,2>()> f, const size_t num) {
 
 int main() {
 	{
-		auto [tr,tw] = bench_avg(bench_random<uint64_t,3000>, 2048);
+		auto [tr,tw] = bench_avg(bench_random<string,3000>, 2048);
 		eprint("u64: tr=",tr," tw=",tw,'\n');
 	}
 	{
-		auto [tr,tw] = bench_avg(test_int_small<int64_t>, 2048);
+		auto [tr,tw] = bench_avg(test_int_small<int16_t>, 2048);
 		eprint("sml: tr=",tr," tw=",tw,'\n');
 	}
 	return 0;
