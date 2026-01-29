@@ -156,6 +156,7 @@ class Scanner{
 		void scan(uint64_t& x) noexcept {scan_u(x);}
 		void scan(unsigned long long& x) noexcept {scan_u(x);}
 
+		template<typename T> inline void scan_u_strict_no0_after_fifss(T& x) noexcept;
 		template<typename T> void scan_f(T& x) noexcept;
 		void scan(float& x) noexcept;
 		void scan(double& x) noexcept;
@@ -209,7 +210,6 @@ class Printer {
 				it+=x.size();
 			}
 		}
-
 		template<typename T> static uint8_t ndigits(T x) noexcept {
 			if(!x) return 1;
 			uint8_t ans=0;
