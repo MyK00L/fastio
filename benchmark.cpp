@@ -1,3 +1,5 @@
+// #define WINDOWS
+
 #define NDEBUG
 
 #include "fastio.cpp"
@@ -34,18 +36,18 @@ template<> string Rng::next<string>() {
 	return s;
 }
 
-Printer eprint(2);
+Printer eprint(DEF_ERR);
 
 template<typename T>
 void test_print(const vector<T>& v, FILE* file) {
-	Printer print(fileno(file));
+	Printer print(ft_from(file));
 	print(v);
 	print.flush();
 }
 
 template<typename T>
 void test_scan(const vector<T>& v, FILE* file) {
-	Scanner scan(fileno(file));
+	Scanner scan(ft_from(file));
 	auto s = v[0];
 	for(const auto& x:v) {
 		scan(s);

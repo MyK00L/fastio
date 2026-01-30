@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -6,14 +5,34 @@
 
 using namespace std;
 
+#ifdef WINDOWS
+#include <cstdio>
+#define FT FILE*
+#define FIO_READ(fd,buf,count) fread(buf,1,count,fd)
+#define FIO_WRITE(fd,buf,count) fwrite(buf,1,count,fd)
+#define DEF_IN stdin
+#define DEF_OUT stdout
+#define DEF_ERR stderr
+__attribute__((unused)) static inline FILE* ft_from(FILE* fp) {return fp;}
+#else
+#include <unistd.h>
+#define FT const int
+#define FIO_READ(fd,buf,count) read(fd,buf,count)
+#define FIO_WRITE(fd,buf,count) write(fd,buf,count)
+#define DEF_IN STDIN_FILENO
+#define DEF_OUT STDOUT_FILENO
+#define DEF_ERR STDERR_FILENO
+__attribute__((unused)) static inline int ft_from(FILE* fp) {return fileno(fp);}
+__attribute__((unused)) static inline int ft_from(int fd) {return fd;}
+#endif
+
 template<size_t BUFSIZE=1<<16>
 class Scanner{
 	private:
 		char buf[BUFSIZE];
 		char* it;
 		char* ed;
-		const int fd;
-		// FILE* fd;
+		FT fd;
 		Scanner(const Scanner&) = delete;
 		Scanner& operator=(const Scanner&) = delete;
 		static inline bool has_space8(const uint64_t x) noexcept {
@@ -49,7 +68,7 @@ class Scanner{
 			constexpr size_t x = 32;
 			if(it+x>ed) {
 				it=copy(it,ed,buf);
-				ed=it+read(fd,it,BUFSIZE+buf-it);
+				ed=it+FIO_READ(fd,it,BUFSIZE+buf-it);
 				it=buf;
 			}
 			while(*it<=32)++it;
@@ -59,15 +78,14 @@ class Scanner{
 			while(it<ed && *it<=32)++it;
 			if(!has_whitespace()) {
 				it=copy(it,ed,buf);
-				ed=it+read(fd,it,BUFSIZE+buf-it);
+				ed=it+FIO_READ(fd,it,BUFSIZE+buf-it);
 				it=buf;
 			}
 			while(*it<=32)++it;
 		}
 #endif
 		void _flush() noexcept {
-			ed=buf+read(fd,buf,BUFSIZE);
-			// ed=buf+fread(buf,1,BUFSIZE,fd);
+			ed=buf+FIO_READ(fd,buf,BUFSIZE);
 			it=buf;
 		}
 		inline void ss() noexcept {
@@ -171,8 +189,7 @@ class Scanner{
 		template<typename T> void scan(T& x) noexcept {for(auto &i:x)scan(i);}
 	public:
 		~Scanner() noexcept {}
-		Scanner(const int _fd=0) noexcept :it(0),ed(0),fd(_fd){}
-		// Scanner(FILE* _fd=stdin):it(0),ed(0),fd(_fd){}
+		Scanner(FT _fd=DEF_IN) noexcept :it(0),ed(0),fd(_fd){}
 		void operator()() noexcept {}
 		template<typename T, typename...R>
 			void operator()(T& a,R&...rest) noexcept {
@@ -186,8 +203,7 @@ class Printer {
 	private:
 		char buf[BUFSIZE];
 		char* it;
-		const int fd;
-		// FILE* fd;
+		FT fd;
 		void fif(const size_t x) noexcept {
 			if(size_t(BUFSIZE+buf-it)<x)flush();
 		}
@@ -196,8 +212,7 @@ class Printer {
 			size_t s = strlen(x);
 			if(s>BUFSIZE/2){
 				flush();
-				write(fd,x,s);
-				// fwrite(x,1,s,fd);
+				FIO_WRITE(fd,x,s);
 			} else {
 				fif(s);
 				copy(x,x+s,it);
@@ -208,8 +223,7 @@ class Printer {
 		void print(const string& x) noexcept {
 			if(x.size()>BUFSIZE/2){
 				flush();
-				write(fd,x.data(),x.size());
-				// fwrite(x.data(),1,x.size(),fd);
+				FIO_WRITE(fd,x.data(),x.size());
 			} else {
 				fif(x.size());
 				copy(x.begin(),x.end(),it);
@@ -307,11 +321,9 @@ class Printer {
 		}
 	public:
 		~Printer() noexcept {flush();}
-		Printer(const int _fd=1) noexcept :it(buf),fd(_fd){}
-		// Printer(FILE* _fd=stdout):it(buf),fd(_fd){}
+		Printer(FT _fd=DEF_OUT) noexcept :it(buf),fd(_fd){}
 		void flush() noexcept {
-			std::ignore = write(fd,buf,it-buf);
-			// fwrite(buf,1,it-buf,fd);
+			std::ignore = FIO_WRITE(fd,buf,it-buf);
 			it=buf;
 		}
 		void operator()() noexcept {}
