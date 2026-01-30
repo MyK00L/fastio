@@ -829,7 +829,7 @@ static unrounded uscale(uint64_t x, Scalers c) noexcept {
 }
 
 double pack64(uint64_t m, int e) noexcept {
-	if((m&(1ULL<<52)) != 0) m = (m&~(1ULL<<52))|((uint64_t)(1075+e)<<52);
+	if((m&(1ULL<<52))!=0) m = (m&~(1ULL<<52))|((uint64_t)(1075+e)<<52);
 	double f;
 	memcpy(&f, &m, sizeof f);
 	return f;
@@ -873,7 +873,7 @@ static inline void format_u64(char *it, uint64_t d64, int nd) noexcept {
 	static constexpr char i2a[201] =
 		"00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354"
 		"555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
-	while((d64>>32) != 0) {
+	while((d64>>32)!=0) {
 		uint32_t x = d64%100000000;
 		d64 /= 100000000;
 		uint32_t y = x%10000;

@@ -89,7 +89,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 		it = buf;
 	}
 	inline void ss() noexcept {
-		while(it != ed && *it<=32) ++it;
+		while(it!=ed && *it<=32) ++it;
 		if(it==ed) {
 			_flush();
 			ss();
@@ -111,7 +111,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 				if(has_space8(a)) break;
 				it += 8;
 			}
-			while(it != ed && *it>32) ++it;
+			while(it!=ed && *it>32) ++it;
 			x.append(itbg, it);
 		} while(it==ed);
 	}

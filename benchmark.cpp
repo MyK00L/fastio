@@ -48,7 +48,7 @@ template<typename T> void test_scan(const vector<T> &v, FILE *file) {
 	auto s = v[0];
 	for(const auto &x : v) {
 		scan(s);
-		if(x != s) [[unlikely]]
+		if(x!=s) [[unlikely]]
 			__builtin_trap();
 	}
 }
