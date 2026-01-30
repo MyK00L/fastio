@@ -972,8 +972,7 @@ template<size_t BUFSIZE> template<typename T> void Scanner<BUFSIZE>::scan_f(T &a
 		if(*it=='-') {
 			pneg = 1;
 			++it;
-		} else if(*it=='+')
-			++it;
+		} else if(*it=='+') ++it;
 		scan_u_after_fifss(p);
 		if(pneg) p = -p;
 	}

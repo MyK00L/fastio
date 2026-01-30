@@ -4,7 +4,7 @@ IndentWidth: 4
 TabWidth: 4
 ColumnLimit: 120
 AllowShortBlocksOnASingleLine: Always
-AllowShortIfStatementsOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortLambdasOnASingleLine: All

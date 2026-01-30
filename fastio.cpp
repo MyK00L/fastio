@@ -289,8 +289,7 @@ template<size_t BUFSIZE = 1<<16> class Printer {
 			nd -= 2;
 		}
 		if(x>=10) memcpy(it+nd-2, i2a+x*2, 2);
-		else
-			it[nd-1] = '0'+x;
+		else it[nd-1] = '0'+x;
 		it += nd0;
 	}
 	template<typename T> void print_u(T x) noexcept {
