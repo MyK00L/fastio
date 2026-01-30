@@ -18,18 +18,18 @@ struct Rng {
 	uint64_t x;
 	template<typename T> T next() {
 		uint64_t z = (x += 0x9e3779b97f4a7c15);
-		z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-		z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-		return T(z ^ (z >> 31));
+		z = (z^(z>>30))*0xbf58476d1ce4e5b9;
+		z = (z^(z>>27))*0x94d049bb133111eb;
+		return T(z^(z>>31));
 	}
 	Rng(uint64_t seed) : x(seed) {}
 } rng(42);
 template<> char Rng::next<char>() {
 	uint64_t x = next<uint64_t>();
-	return 'a' + x % 26;
+	return 'a'+x%26;
 }
 template<> string Rng::next<string>() {
-	size_t siz = 1 + (next<uint64_t>() % 42);
+	size_t siz = 1+(next<uint64_t>()%42);
 	string s(siz, 'a');
 	for(auto &c : s) c = next<char>();
 	return s;
@@ -58,7 +58,7 @@ template<typename T> void test_scan(const vector<T> &v, FILE *file) {
 	do { \
 		out = __rdtsc(); \
 		test; \
-		out = __rdtsc() - out; \
+		out = __rdtsc()-out; \
 	} while(0)
 
 template<typename T> array<uint64_t, 2> bench_pair(const vector<T> &v) {
@@ -73,7 +73,7 @@ template<typename T> array<uint64_t, 2> bench_pair(const vector<T> &v) {
 template<typename T> array<uint64_t, 2> test_int_small() {
 	vector<T> v;
 	v.reserve(13001);
-	for(T i = -6500; i <= 6500; ++i) v.push_back(i);
+	for(T i = -6500; i<=6500; ++i) v.push_back(i);
 	return bench_pair(v);
 }
 
@@ -84,8 +84,8 @@ template<typename T, const size_t N> array<uint64_t, 2> bench_random() {
 }
 
 array<uint64_t, 2> bench_avg(function<array<uint64_t, 2>()> f, const size_t num) {
-	array<uint64_t, 2> ans = {num - 1, num - 1};
-	for(size_t i = 0; i < num; ++i) {
+	array<uint64_t, 2> ans = {num-1, num-1};
+	for(size_t i = 0; i<num; ++i) {
 		array<uint64_t, 2> t = f();
 		ans[0] += t[0];
 		ans[1] += t[1];

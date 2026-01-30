@@ -18,7 +18,7 @@ template<typename T> void tt() {
 int main() {
 	size_t n;
 	scan(n);
-	if(n == 0) {
+	if(n==0) {
 		tt<int8_t>();
 		tt<char>();
 		tt<uint64_t>();
@@ -27,10 +27,10 @@ int main() {
 		tt<vector<vector<long>>>();
 	}
 	int64_t sum = 0;
-	for(size_t i = 0; i < n; ++i) {
+	for(size_t i = 0; i<n; ++i) {
 		int64_t x;
 		scan(x);
-		if(x == 0) {
+		if(x==0) {
 			print(sum, '\n');
 			print.flush();
 		}
