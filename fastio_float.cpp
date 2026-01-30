@@ -6,7 +6,7 @@
 constexpr int pow10_min = -348;
 constexpr int pow10_max = 347;
 
-static uint64_t pow10_tab[pow10_max-pow10_min+1][2] = {
+static uint64_t pow10_tab[pow10_max - pow10_min + 1][2] = {
 	{0xfa8fd5a0081c0289, 0xe8cd3796329f1bac}, // 1e-348 * 2**1284
 	{0x9c99e58405118196, 0xf18042bddfa3714b}, // 1e-347 * 2**1280
 	{0xc3c05ee50655e1fb, 0xade0536d578c4d9e}, // 1e-346 * 2**1277
@@ -705,11 +705,28 @@ static uint64_t pow10_tab[pow10_max-pow10_min+1][2] = {
 	{0xd13eb46469447568, 0xb48e6a0d2d2e5604}, // 1e347 * 2**-1025
 };
 
-constexpr uint64_t pow10[20] = {1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000,10000000000,100000000000,1000000000000,10000000000000,100000000000000,1000000000000000,10000000000000000,100000000000000000,1000000000000000000,10000000000000000000ull};
+constexpr uint64_t pow10[20] = {1,
+								10,
+								100,
+								1000,
+								10000,
+								100000,
+								1000000,
+								10000000,
+								100000000,
+								1000000000,
+								10000000000,
+								100000000000,
+								1000000000000,
+								10000000000000,
+								100000000000000,
+								1000000000000000,
+								10000000000000000,
+								100000000000000000,
+								1000000000000000000,
+								10000000000000000000ull};
 
-static inline uint64_t rotate_right64(uint64_t x, int s) noexcept {
-	return (x>>s) | (x<<(64-s));
-}
+static inline uint64_t rotate_right64(uint64_t x, int s) noexcept { return (x >> s) | (x << (64 - s)); }
 static inline void trim_zeros(uint64_t x, int p, uint64_t *xp, int *pp) noexcept {
 	constexpr uint64_t max64 = ~0ULL;
 	constexpr uint64_t div1e8m = 0xc767074b22e90e21ULL;
@@ -722,7 +739,7 @@ static inline void trim_zeros(uint64_t x, int p, uint64_t *xp, int *pp) noexcept
 	constexpr uint64_t div1e1le = max64 / 10;
 	uint64_t d;
 	// Cut 1 zero, or else return.
-	if ((d = rotate_right64(x*div1e1m, 1)) <= div1e1le) {
+	if((d = rotate_right64(x * div1e1m, 1)) <= div1e1le) {
 		x = d;
 		p++;
 	} else {
@@ -731,19 +748,19 @@ static inline void trim_zeros(uint64_t x, int p, uint64_t *xp, int *pp) noexcept
 		return;
 	}
 	// Cut 8 zeros, then 4, then 2, then 1.
-	if ((d = rotate_right64(x*div1e8m, 8)) <= div1e8le) {
+	if((d = rotate_right64(x * div1e8m, 8)) <= div1e8le) {
 		x = d;
 		p += 8;
 	}
-	if ((d = rotate_right64(x*div1e4m, 4)) <= div1e4le) {
+	if((d = rotate_right64(x * div1e4m, 4)) <= div1e4le) {
 		x = d;
 		p += 4;
 	}
-	if ((d = rotate_right64(x*div1e2m, 2)) <= div1e2le) {
+	if((d = rotate_right64(x * div1e2m, 2)) <= div1e2le) {
 		x = d;
 		p += 2;
 	}
-	if ((d = rotate_right64(x*div1e1m, 1)) <= div1e1le) {
+	if((d = rotate_right64(x * div1e1m, 1)) <= div1e1le) {
 		x = d;
 		p += 1;
 	}
@@ -754,27 +771,27 @@ static inline void trim_zeros(uint64_t x, int p, uint64_t *xp, int *pp) noexcept
 inline void unpack64(double f, uint64_t *mp, int *ep) noexcept {
 	uint64_t b;
 	memcpy(&b, &f, sizeof f);
-	uint64_t m = (b&((1ULL<<52)-1))<<11;
-	int e = ((b>>52)&((1<<11)-1)) - 1086;
-	if (e == -1086) {
+	uint64_t m = (b & ((1ULL << 52) - 1)) << 11;
+	int e = ((b >> 52) & ((1 << 11) - 1)) - 1086;
+	if(e == -1086) {
 		e = -1085;
-		int s = m==0?64:__builtin_clzll(m);
+		int s = m == 0 ? 64 : __builtin_clzll(m);
 		m <<= s;
 		e -= s;
 	} else {
-		m |= 1ULL<< 63;
+		m |= 1ULL << 63;
 	}
 	*mp = m;
 	*ep = e;
 }
 using unrounded = uint64_t;
-static inline uint64_t ufloor(unrounded u) noexcept { return (u+0) >> 2; }
-static inline uint64_t uceil(unrounded u) noexcept { return (u+3) >> 2; }
+static inline uint64_t ufloor(unrounded u) noexcept { return (u + 0) >> 2; }
+static inline uint64_t uceil(unrounded u) noexcept { return (u + 3) >> 2; }
 static inline uint64_t unudge(unrounded u, int d) noexcept { return u + d; }
-static inline uint64_t uround(unrounded u) noexcept { return (u + 1 + ((u>>2)&1)) >> 2; }
+static inline uint64_t uround(unrounded u) noexcept { return (u + 1 + ((u >> 2) & 1)) >> 2; }
 static inline int log10pow2(int x) noexcept { return (x * 78913) >> 18; }
 static inline int log2pow10(int x) noexcept { return (x * 108853) >> 15; }
-static inline int skewed(int e) noexcept { return (e*631305 - 261663) >> 21; }
+static inline int skewed(int e) noexcept { return (e * 631305 - 261663) >> 21; }
 
 struct Digits {
 	uint64_t d;
@@ -788,8 +805,7 @@ struct Scalers {
 };
 
 static Scalers prescale(int e, int p, int lp) noexcept {
-	if(p < pow10_min || p > pow10_max)
-		abort();
+	if(p < pow10_min || p > pow10_max) abort();
 	int s = -(e + lp + 3);
 	Scalers pre;
 	p -= pow10_min;
@@ -801,20 +817,19 @@ static Scalers prescale(int e, int p, int lp) noexcept {
 
 static unrounded uscale(uint64_t x, Scalers c) noexcept {
 	unsigned __int128 full = (unsigned __int128)x * c.pmHi;
-	uint64_t hi = full>>64;
+	uint64_t hi = full >> 64;
 	uint64_t mid1 = full;
 	uint64_t sticky = 1;
-	if ((hi & ((1ULL<<c.s)-1)) == 0) {
+	if((hi & ((1ULL << c.s) - 1)) == 0) {
 		uint64_t mid2 = ((unsigned __int128)x * c.pmLo) >> 64;
-		sticky = (mid1-mid2 > 1);
+		sticky = (mid1 - mid2 > 1);
 		hi -= mid1 < mid2;
 	}
-	return (hi>>c.s) | sticky;
+	return (hi >> c.s) | sticky;
 }
 
 double pack64(uint64_t m, int e) noexcept {
-	if((m & (1ULL<<52)) != 0)
-		m = (m&~(1ULL<<52)) | ((uint64_t)(1075+e)<<52);
+	if((m & (1ULL << 52)) != 0) m = (m & ~(1ULL << 52)) | ((uint64_t)(1075 + e) << 52);
 	double f;
 	memcpy(&f, &m, sizeof f);
 	return f;
@@ -828,38 +843,37 @@ static inline void short_f64_format(double f, uint64_t *dp, int *pp) noexcept {
 	int p;
 	uint64_t min;
 	int b = 11;
-	if (m == 1ULL<<63 && e > -1085) {
-		p = -skewed(e+b);
-		min = m - (1ULL<<(b-2));
+	if(m == 1ULL << 63 && e > -1085) {
+		p = -skewed(e + b);
+		min = m - (1ULL << (b - 2));
 	} else {
-		if (e < -1085) {
-			b = 11 + (-1085 - e);
-		}
-		p = -log10pow2(e+b);
-		min = m - (1ULL<<(b-1));
+		if(e < -1085) { b = 11 + (-1085 - e); }
+		p = -log10pow2(e + b);
+		min = m - (1ULL << (b - 1));
 	}
-	uint64_t max = m + (1ULL<<(b-1));
+	uint64_t max = m + (1ULL << (b - 1));
 
-	int odd = (m>>b) & 1;
+	int odd = (m >> b) & 1;
 	Scalers pre = prescale(e, p, log2pow10(p));
 	uint64_t dmin = uceil(unudge(uscale(min, pre), +odd));
 	uint64_t dmax = ufloor(unudge(uscale(max, pre), -odd));
 
 	uint64_t d0 = dmax / 10 * 10;
-	if (d0 >= dmin) {
-		trim_zeros(dmax/10, -(p-1), dp, pp);
+	if(d0 >= dmin) {
+		trim_zeros(dmax / 10, -(p - 1), dp, pp);
 		return;
 	}
 	uint64_t d = dmin;
-	if (d < dmax)
-		d = uround(uscale(m, pre));
+	if(d < dmax) d = uround(uscale(m, pre));
 	*dp = d;
 	*pp = -p;
 }
 
 static inline void format_u64(char *it, uint64_t d64, int nd) noexcept {
-	static constexpr char i2a[201] = "00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
-	while ((d64>>32) != 0) {
+	static constexpr char i2a[201] =
+		"00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354"
+		"555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
+	while((d64 >> 32) != 0) {
 		uint32_t x = d64 % 100000000;
 		d64 /= 100000000;
 		uint32_t y = x % 10000;
@@ -868,10 +882,10 @@ static inline void format_u64(char *it, uint64_t d64, int nd) noexcept {
 		uint32_t x0 = (x % 100) * 2;
 		uint32_t y1 = (y / 100) * 2;
 		uint32_t y0 = (y % 100) * 2;
-		memcpy(it+nd-8, i2a+x1, 2);
-		memcpy(it+nd-6, i2a+x0, 2);
-		memcpy(it+nd-4, i2a+y1, 2);
-		memcpy(it+nd-2, i2a+y0, 2);
+		memcpy(it + nd - 8, i2a + x1, 2);
+		memcpy(it + nd - 6, i2a + x0, 2);
+		memcpy(it + nd - 4, i2a + y1, 2);
+		memcpy(it + nd - 2, i2a + y0, 2);
 		nd -= 8;
 	}
 	uint32_t d = d64;
@@ -880,123 +894,117 @@ static inline void format_u64(char *it, uint64_t d64, int nd) noexcept {
 		d /= 10000;
 		uint32_t x1 = (x / 100) * 2;
 		uint32_t x0 = (x % 100) * 2;
-		memcpy(it+nd-4, i2a+x1, 2);
-		memcpy(it+nd-2, i2a+x0, 2);
+		memcpy(it + nd - 4, i2a + x1, 2);
+		memcpy(it + nd - 2, i2a + x0, 2);
 		nd -= 4;
 	}
 	if(d >= 100) {
 		uint32_t x = d % 100;
 		d /= 100;
-		memcpy(it+nd-2, i2a+2*x, 2);
+		memcpy(it + nd - 2, i2a + 2 * x, 2);
 		nd -= 2;
 	}
 	if(d >= 10) {
-		memcpy(it+nd-2, i2a+2*d, 2);
+		memcpy(it + nd - 2, i2a + 2 * d, 2);
 		return;
 	}
-	it[nd-1] = '0' + d;
+	it[nd - 1] = '0' + d;
 }
 
 static inline bool is_digits8(const uint64_t x) noexcept {
 	constexpr uint64_t _70 = 0x4646464646464646;
 	constexpr uint64_t _80 = 0x5050505050505050;
 	constexpr uint64_t _128 = 0x8080808080808080;
-	return !(((x+_70)|(~(x+_80)))&_128);
+	return !(((x + _70) | (~(x + _80))) & _128);
 }
 static inline bool is_digits4(const uint32_t x) noexcept {
 	constexpr uint32_t _70 = 0x46464646;
 	constexpr uint32_t _80 = 0x50505050;
 	constexpr uint32_t _128 = 0x80808080;
-	return !(((x+_70)|(~(x+_80)))&_128);
+	return !(((x + _70) | (~(x + _80))) & _128);
 }
-template<size_t BUFSIZE> template<typename T> inline void Scanner<BUFSIZE>::scan_u_strict_no0_after_fifss(T& x) noexcept {
-	while(ed-it>=8) {
-		uint64_t a=0;
+template<size_t BUFSIZE>
+template<typename T>
+inline void Scanner<BUFSIZE>::scan_u_strict_no0_after_fifss(T &x) noexcept {
+	while(ed - it >= 8) {
+		uint64_t a = 0;
 		std::memcpy(&a, it, sizeof(a));
 		if(is_digits8(a)) {
 			trick8(a);
-			x=T(x*T(100000000)+T(a));
-			it+=8;
+			x = T(x * T(100000000) + T(a));
+			it += 8;
 		} else {
 			break;
 		}
 	}
-	if(ed-it>=4) {
-		uint32_t a=0;
+	if(ed - it >= 4) {
+		uint32_t a = 0;
 		std::memcpy(&a, it, sizeof(a));
 		if(is_digits4(a)) {
 			trick4(a);
-			x=T(x*T(10000)+T(a));
-			it+=4;
+			x = T(x * T(10000) + T(a));
+			it += 4;
 		}
 	}
-	while(*it>='0' && *it<='9') {
-		x=T(x*10+(*it++&0xf));
-	}
+	while(*it >= '0' && *it <= '9') { x = T(x * 10 + (*it++ & 0xf)); }
 }
 
-template<size_t BUFSIZE>
-template<typename T>
-void Scanner<BUFSIZE>::scan_f(T& ans) noexcept {
+template<size_t BUFSIZE> template<typename T> void Scanner<BUFSIZE>::scan_f(T &ans) noexcept {
 	fifss();
-	uint64_t d=0;
-	int16_t frac=0;
-	int16_t p=0;
-	bool dneg=0;
-	if(*it=='-') {
-		dneg=1;
+	uint64_t d = 0;
+	int16_t frac = 0;
+	int16_t p = 0;
+	bool dneg = 0;
+	if(*it == '-') {
+		dneg = 1;
 		++it;
 	}
 	scan_u_strict_no0_after_fifss(d);
-	if(it<ed && *it=='.') {
+	if(it < ed && *it == '.') {
 		++it;
-		char* tmp=it;
+		char *tmp = it;
 		scan_u_strict_no0_after_fifss(d);
-		frac=it-tmp;
+		frac = it - tmp;
 	}
-	if(it<ed && (*it=='e' || *it=='E')) {
+	if(it < ed && (*it == 'e' || *it == 'E')) {
 		++it;
-		bool pneg=0;
-		if(*it=='-') {
-			pneg=1;
+		bool pneg = 0;
+		if(*it == '-') {
+			pneg = 1;
 			++it;
-		} else if(*it=='+') ++it;
+		} else if(*it == '+')
+			++it;
 		scan_u_after_fifss(p);
-		if(pneg) p=-p;
+		if(pneg) p = -p;
 	}
-	p=p-frac;
+	p = p - frac;
 	// parse
-	int b = d?(64 - __builtin_clzll(d)):64;
+	int b = d ? (64 - __builtin_clzll(d)) : 64;
 	int lp = log2pow10(p);
 	int e = 53 - b - lp;
-	if (e > 1074)
-		e = 1074;
-	unrounded u = uscale(d<<(64-b), prescale(e-(64-b), p, lp));
-	int adj = (u >= (1ULL<<55)-2);
-	u = (u>>adj) | (u&1);
+	if(e > 1074) e = 1074;
+	unrounded u = uscale(d << (64 - b), prescale(e - (64 - b), p, lp));
+	int adj = (u >= (1ULL << 55) - 2);
+	u = (u >> adj) | (u & 1);
 	e -= adj;
 	uint64_t m = uround(u);
 	double dans = pack64(m, -e);
-	if(dneg) dans=-dans;
+	if(dneg) dans = -dans;
 	ans = T(dans);
 }
-template<size_t BUFSIZE>
-void Scanner<BUFSIZE>::scan(float& x) noexcept {scan_f(x);}
-template<size_t BUFSIZE>
-void Scanner<BUFSIZE>::scan(double& x) noexcept {scan_f(x);}
-template<size_t BUFSIZE>
-void Scanner<BUFSIZE>::scan(long double& x) noexcept {scan_f(x);}
+template<size_t BUFSIZE> void Scanner<BUFSIZE>::scan(float &x) noexcept { scan_f(x); }
+template<size_t BUFSIZE> void Scanner<BUFSIZE>::scan(double &x) noexcept { scan_f(x); }
+template<size_t BUFSIZE> void Scanner<BUFSIZE>::scan(long double &x) noexcept { scan_f(x); }
 
-template<size_t BUFSIZE>
-void Printer<BUFSIZE>::print_f(double x) noexcept {
+template<size_t BUFSIZE> void Printer<BUFSIZE>::print_f(double x) noexcept {
 	fif(32);
-	if(x==0) {
-		*(it++)='0';
+	if(x == 0) {
+		*(it++) = '0';
 		return;
 	}
-	if(x<0) {
-		*(it++)='-';
-		x=-x;
+	if(x < 0) {
+		*(it++) = '-';
+		x = -x;
 	}
 
 	uint64_t d;
@@ -1007,45 +1015,41 @@ void Printer<BUFSIZE>::print_f(double x) noexcept {
 
 	// Format(it, d, p, nd);
 	{
-		if(nd==-p) {
-			format_u64(it+2, d, nd);
-			it[0]='0';
-			it[1]='.';
-			it+=nd+2;
-			p=0;
-		} else if(p<0 && nd>=-p) {
-			format_u64(it+1, d, nd);
-			copy(it+1,it+1+nd+p,it);
-			it[nd+p]='.';
-			it+=nd+1;
-			p=0;
-		} else if(p>=0 && p<5 && nd+p<19) {
-			nd+=p;
-			d*=pow10[p];
+		if(nd == -p) {
+			format_u64(it + 2, d, nd);
+			it[0] = '0';
+			it[1] = '.';
+			it += nd + 2;
+			p = 0;
+		} else if(p < 0 && nd >= -p) {
+			format_u64(it + 1, d, nd);
+			copy(it + 1, it + 1 + nd + p, it);
+			it[nd + p] = '.';
+			it += nd + 1;
+			p = 0;
+		} else if(p >= 0 && p < 5 && nd + p < 19) {
+			nd += p;
+			d *= pow10[p];
 			format_u64(it, d, nd);
-			it+=nd;
-			p=0;
+			it += nd;
+			p = 0;
 		} else {
-			format_u64(it+1, d, nd);
+			format_u64(it + 1, d, nd);
 			p += nd - 1;
 			it[0] = it[1];
-			if(nd>1) it[1]='.';
-			it+=nd+(nd>1);
+			if(nd > 1) it[1] = '.';
+			it += nd + (nd > 1);
 		}
 		if(p) {
-			*(it++)='e';
-			if(p<0) {
-				*(it++)='-';
+			*(it++) = 'e';
+			if(p < 0) {
+				*(it++) = '-';
 				p = -p;
 			}
-			print_u_afterfif(p,ndigits(p));
+			print_u_afterfif(p, ndigits(p));
 		}
 	}
 }
-template<size_t BUFSIZE>
-void Printer<BUFSIZE>::print(const float x) noexcept {print_f(x);}
-template<size_t BUFSIZE>
-void Printer<BUFSIZE>::print(const double x) noexcept {print_f(x);}
-template<size_t BUFSIZE>
-void Printer<BUFSIZE>::print(const long double x) noexcept {print_f(x);}
-
+template<size_t BUFSIZE> void Printer<BUFSIZE>::print(const float x) noexcept { print_f(x); }
+template<size_t BUFSIZE> void Printer<BUFSIZE>::print(const double x) noexcept { print_f(x); }
+template<size_t BUFSIZE> void Printer<BUFSIZE>::print(const long double x) noexcept { print_f(x); }
