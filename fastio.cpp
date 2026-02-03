@@ -28,7 +28,7 @@ __attribute__((unused)) static inline int ft_from(int fd) { return fd; }
 
 template<size_t BUFSIZE = 1<<16> class Scanner {
   private:
-	char buf[BUFSIZE];
+	char buf[BUFSIZE+8];
 	char *it;
 	char *ed;
 	FT fd;
@@ -75,7 +75,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	}
 #else
 	void fifss() noexcept {
-		while(it<ed && *it<=32) ++it;
+		while(it!=ed && *it<=32) ++it;
 		if(!has_whitespace()) {
 			it = copy(it, ed, buf);
 			ed = it+FIO_READ(fd, it, BUFSIZE+buf-it);
@@ -127,14 +127,14 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	}
 	template<typename T> inline void scan_u_after_fifss(T &x) noexcept {
 		x = 0;
-		if(ed-it>=8) {
+		{
 			uint64_t a = 0;
 			std::memcpy(&a, it, sizeof(a));
 			if(!has_space8(a)) {
 				trick8(a);
 				x = T(a);
 				it += 8;
-				if(ed-it>=8) {
+				{
 					std::memcpy(&a, it, sizeof(a));
 					if(!has_space8(a)) {
 						trick8(a);
@@ -144,7 +144,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 				}
 			}
 		}
-		if(ed-it>=4) {
+		{
 			uint32_t a = 0;
 			std::memcpy(&a, it, sizeof(a));
 			if(!has_space4(a)) {
@@ -193,7 +193,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 
   public:
 	~Scanner() noexcept {}
-	Scanner(FT _fd = DEF_IN) noexcept : it(0), ed(0), fd(_fd) {}
+	Scanner(FT _fd = DEF_IN) noexcept : it(0), ed(0), fd(_fd) { memset(buf+BUFSIZE, 0, 8); }
 	void operator()() noexcept {}
 	template<typename T, typename... R> void operator()(T &a, R &...rest) noexcept {
 		scan(a);

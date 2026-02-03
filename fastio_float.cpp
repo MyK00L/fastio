@@ -926,7 +926,7 @@ static inline bool is_digits4(const uint32_t x) noexcept {
 template<size_t BUFSIZE>
 template<typename T>
 inline void Scanner<BUFSIZE>::scan_u_strict_no0_after_fifss(T &x) noexcept {
-	while(ed-it>=8) {
+	for(;;) {
 		uint64_t a = 0;
 		std::memcpy(&a, it, sizeof(a));
 		if(is_digits8(a)) {
@@ -937,7 +937,7 @@ inline void Scanner<BUFSIZE>::scan_u_strict_no0_after_fifss(T &x) noexcept {
 			break;
 		}
 	}
-	if(ed-it>=4) {
+	{
 		uint32_t a = 0;
 		std::memcpy(&a, it, sizeof(a));
 		if(is_digits4(a)) {
