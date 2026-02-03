@@ -127,14 +127,14 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	}
 	template<typename T> inline void scan_u_after_fifss(T &x) noexcept {
 		x = 0;
-		{
+		if(sizeof(T)>=4) {
 			uint64_t a = 0;
 			std::memcpy(&a, it, sizeof(a));
 			if(!has_space8(a)) {
 				trick8(a);
 				x = T(a);
 				it += 8;
-				{
+				if(sizeof(T)>=8) {
 					std::memcpy(&a, it, sizeof(a));
 					if(!has_space8(a)) {
 						trick8(a);
@@ -144,7 +144,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 				}
 			}
 		}
-		{
+		if(sizeof(T)>=2) {
 			uint32_t a = 0;
 			std::memcpy(&a, it, sizeof(a));
 			if(!has_space4(a)) {
