@@ -35,14 +35,14 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	Scanner(const Scanner &) = delete;
 	Scanner &operator=(const Scanner &) = delete;
 	static inline bool has_space8(const uint64_t x) noexcept {
-		constexpr uint64_t _96 = 0x5f5f5f5f5f5f5f5f;
+		constexpr uint64_t _160 = 0xa0a0a0a0a0a0a0a0;
 		constexpr uint64_t _128 = 0x8080808080808080;
-		return (~(x+_96))&_128;
+		return (_160-x)&_128;
 	}
 	static inline bool has_space4(const uint32_t x) noexcept {
-		constexpr uint32_t _96 = 0x5f5f5f5f;
+		constexpr uint64_t _160 = 0xa0a0a0a0;
 		constexpr uint32_t _128 = 0x80808080;
-		return (~(x+_96))&_128;
+		return (_160-x)&_128;
 	}
 	bool has_whitespace() const noexcept {
 		char *i = it;

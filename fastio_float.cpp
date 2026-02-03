@@ -913,15 +913,15 @@ static inline void format_u64(char *it, uint64_t d64, int nd) noexcept {
 
 static inline bool is_digits8(const uint64_t x) noexcept {
 	constexpr uint64_t _70 = 0x4646464646464646;
-	constexpr uint64_t _80 = 0x5050505050505050;
+	constexpr uint64_t _175 = 0xafafafafafafafaf;
 	constexpr uint64_t _128 = 0x8080808080808080;
-	return !(((x+_70)|(~(x+_80)))&_128);
+	return !(((x+_70)|(_175-x))&_128);
 }
 static inline bool is_digits4(const uint32_t x) noexcept {
 	constexpr uint32_t _70 = 0x46464646;
-	constexpr uint32_t _80 = 0x50505050;
+	constexpr uint64_t _175 = 0xafafafaf;
 	constexpr uint32_t _128 = 0x80808080;
-	return !(((x+_70)|(~(x+_80)))&_128);
+	return !(((x+_70)|(_175-x))&_128);
 }
 template<size_t BUFSIZE>
 template<typename T>
