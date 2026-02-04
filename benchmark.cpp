@@ -29,10 +29,17 @@ template<> char Rng::next<char>() {
 	return 'a'+x%26;
 }
 template<> string Rng::next<string>() {
-	size_t siz = 1+(next<uint64_t>()%42);
+	size_t siz = 1+(next<uint64_t>()%128);
 	string s(siz, 'a');
 	for(auto &c : s) c = next<char>();
 	return s;
+}
+template<> double Rng::next<double>() {
+	if(next<bool>()) {
+		return __builtin_bit_cast(double, next<uint64_t>());
+	} else {
+		return double(next<uint64_t>())/100.0;
+	}
 }
 
 Printer eprint(DEF_ERR);
@@ -43,12 +50,19 @@ template<typename T> void test_print(const vector<T> &v, FILE *file) {
 	print.flush();
 }
 
+template<typename T> inline bool differ(const T &a, const T &b) {
+	if constexpr(is_floating_point_v<T>) {
+		if(isnan(a) && isnan(b)) return 0;
+		if(isinf(a) && isinf(b) && a*b>0) return 0;
+	}
+	return a!=b;
+}
 template<typename T> void test_scan(const vector<T> &v, FILE *file) {
 	Scanner scan(ft_from(file));
 	auto s = v[0];
 	for(const auto &x : v) {
 		scan(s);
-		if(x!=s) [[unlikely]]
+		if(differ(x, s)) [[unlikely]]
 			__builtin_trap();
 	}
 }
@@ -97,11 +111,11 @@ array<uint64_t, 2> bench_avg(function<array<uint64_t, 2>()> f, const size_t num)
 
 int main() {
 	{
-		auto [tr, tw] = bench_avg(bench_random<string, 3000>, 2048);
+		auto [tr, tw] = bench_avg(bench_random<double, 3000>, 2048);
 		eprint("u64: tr=", tr, " tw=", tw, '\n');
 	}
 	{
-		auto [tr, tw] = bench_avg(test_int_small<int16_t>, 2048);
+		auto [tr, tw] = bench_avg(test_int_small<int32_t>, 2048);
 		eprint("sml: tr=", tr, " tw=", tw, '\n');
 	}
 	return 0;

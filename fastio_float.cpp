@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -959,6 +960,17 @@ template<size_t BUFSIZE> template<typename T> void Scanner<BUFSIZE>::scan_f(T &a
 		dneg = 1;
 		++it;
 	}
+	if(*it=='i' || *it=='I') {
+		it += 3;
+		ans = INFINITY;
+		if(dneg) ans = -ans;
+		return;
+	}
+	if(*it=='n' || *it=='N') {
+		it += 3;
+		ans = NAN;
+		return;
+	}
 	scan_u_strict_no0_after_fifss(d);
 	if(it<ed && *it=='.') {
 		++it;
@@ -997,13 +1009,25 @@ template<size_t BUFSIZE> void Scanner<BUFSIZE>::scan(long double &x) noexcept { 
 
 template<size_t BUFSIZE> void Printer<BUFSIZE>::print_f(double x) noexcept {
 	fif(32);
-	if(x==0) {
-		*(it++) = '0';
-		return;
-	}
 	if(x<0) {
 		*(it++) = '-';
 		x = -x;
+	}
+	if(isnan(x)) {
+		*(it++) = 'n';
+		*(it++) = 'a';
+		*(it++) = 'n';
+		return;
+	}
+	if(isinf(x)) {
+		*(it++) = 'i';
+		*(it++) = 'n';
+		*(it++) = 'f';
+		return;
+	}
+	if(x==0) {
+		*(it++) = '0';
+		return;
 	}
 
 	uint64_t d;
