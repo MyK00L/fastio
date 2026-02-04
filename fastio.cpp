@@ -69,16 +69,20 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 		if(it+x>ed) {
 			it = copy(it, ed, buf);
 			ed = it+FIO_READ(fd, it, BUFSIZE+buf-it);
+			*ed = 0;
+			*(ed+1) = 127;
 			it = buf;
 		}
 		while(*it<=32) ++it;
 	}
 #else
 	void fifss() noexcept {
-		while(it!=ed && *it<=32) ++it;
+		while(*it<=32) ++it;
 		if(!has_whitespace()) {
 			it = copy(it, ed, buf);
 			ed = it+FIO_READ(fd, it, BUFSIZE+buf-it);
+			*ed = 0;
+			*(ed+1) = 127;
 			it = buf;
 		}
 		while(*it<=32) ++it;
@@ -86,11 +90,13 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 #endif
 	void _flush() noexcept {
 		ed = buf+FIO_READ(fd, buf, BUFSIZE);
+		*ed = 0;
+		*(ed+1) = 127;
 		it = buf;
 	}
 	inline void ss() noexcept {
-		while(it!=ed && *it<=32) ++it;
-		if(it==ed) {
+		while(*it<=32) ++it;
+		if(it>=ed) {
 			_flush();
 			ss();
 		}
@@ -198,7 +204,11 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 
   public:
 	~Scanner() noexcept {}
-	Scanner(FT _fd = DEF_IN) noexcept : it(0), ed(0), fd(_fd) { memset(buf+BUFSIZE, 0, 8); }
+	Scanner(FT _fd = DEF_IN) noexcept : it(0), ed(0), fd(_fd) {
+		memset(buf+BUFSIZE, 0, 8);
+		buf[BUFSIZE+1] = 127;
+		_flush();
+	}
 	void operator()() noexcept {}
 	template<typename T, typename... R> void operator()(T &a, R &...rest) noexcept {
 		scan(a);
