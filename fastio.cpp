@@ -102,16 +102,21 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	void scan(string &x) noexcept {
 		x.clear();
 		ss();
+		constexpr uint64_t _160 = 0xa0a0a0a0a0a0a0a0;
+		constexpr uint64_t _128 = 0x8080808080808080;
 		do {
 			if(it==ed) _flush();
 			char *itbg = it;
-			while(ed-it>=8) {
+			for(;;) {
 				uint64_t a;
 				std::memcpy(&a, it, sizeof(a));
-				if(has_space8(a)) break;
+				uint64_t s = (_160-a)&_128;
+				if(s) {
+					it += __builtin_ctzll(s)/8;
+					break;
+				}
 				it += 8;
 			}
-			while(it!=ed && *it>32) ++it;
 			x.append(itbg, it);
 		} while(it==ed);
 	}
