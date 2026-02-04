@@ -185,13 +185,14 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	void scan(int16_t &x) noexcept { scan_i(x); }
 	void scan(int32_t &x) noexcept { scan_i(x); }
 	void scan(int64_t &x) noexcept { scan_i(x); }
-	void scan(long long &x) noexcept { scan_i(x); }
 	void scan(uint8_t &x) noexcept { scan_u(x); }
 	void scan(uint16_t &x) noexcept { scan_u(x); }
 	void scan(uint32_t &x) noexcept { scan_u(x); }
 	void scan(uint64_t &x) noexcept { scan_u(x); }
+#ifndef WINDOWS
+	void scan(long long &x) noexcept { scan_i(x); }
 	void scan(unsigned long long &x) noexcept { scan_u(x); }
-
+#endif
 	template<typename T> inline void scan_u_strict_no0_after_fifss(T &x) noexcept;
 	template<typename T> void scan_f(T &x) noexcept;
 	void scan(float &x) noexcept;
