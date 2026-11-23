@@ -67,6 +67,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	void fifss() noexcept {
 		constexpr size_t x = 32;
 		if(it+x>ed) {
+			if(it>ed) it = ed; // <- TODO: better fix?
 			it = copy(it, ed, buf);
 			ed = it+FIO_READ(fd, it, BUFSIZE+buf-it);
 			*ed = 0;
