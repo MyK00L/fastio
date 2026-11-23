@@ -79,6 +79,7 @@ template<size_t BUFSIZE = 1<<16> class Scanner {
 	void fifss() noexcept {
 		while(*it<=32) ++it;
 		if(!has_whitespace()) {
+			if(it>ed) it = ed;
 			it = copy(it, ed, buf);
 			ed = it+FIO_READ(fd, it, BUFSIZE+buf-it);
 			*ed = 0;
